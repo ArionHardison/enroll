@@ -14,6 +14,7 @@ class Enrollments::IndividualMarket::FamilyEnrollmentRenewal
 
   def renew
     @cross_walk_product = fetch_cross_product
+    @eligible_enrollment_members = eligible_enrollment_members
     set_csr_value if enrollment.is_health_enrollment?
     renewal_enrollment = clone_enrollment
     populate_aptc_hash(renewal_enrollment) if renewal_enrollment.is_health_enrollment?
@@ -74,7 +75,7 @@ class Enrollments::IndividualMarket::FamilyEnrollmentRenewal
     csr_op = ::Operations::PremiumCredits::FindCsrValue.new.call({
                                                                    family: enrollment.family,
                                                                    year: renewal_coverage_start.year,
-                                                                   family_member_ids: enrolled_family_member_ids
+                                                                   family_member_ids: @eligible_enrollment_members.map(&:applicant_id)
                                                                  })
     return unless csr_op.success?
 
@@ -145,10 +146,6 @@ class Enrollments::IndividualMarket::FamilyEnrollmentRenewal
     members = tax_household.tax_household_members
     enrollment_members_in_thh = members.where(:applicant_id.in => renewal_enrollment.hbx_enrollment_members.map(&:applicant_id))
     enrollment_members_in_thh.all? {|m| m.is_ia_eligible == true}
-  end
-
-  def enrolled_family_member_ids
-    enrollment.hbx_enrollment_members.map(&:applicant_id)
   end
 
   def fetch_csr_percent(csr_kind)
@@ -391,7 +388,7 @@ class Enrollments::IndividualMarket::FamilyEnrollmentRenewal
   # End: Residency Status & Citizenship Member Eligibility Checks
 
   def clone_enrollment_members
-    old_enrollment_members = eligible_enrollment_members
+    old_enrollment_members = @eligible_enrollment_members || eligible_enrollment_members
     raise "Unable to generate renewal for enrollment with hbx_id #{@enrollment.hbx_id} due to missing(eligible) enrollment members." if old_enrollment_members.blank?
 
     latest_enrollment = @enrollment.family.active_household.hbx_enrollments.where(:aasm_state.nin => ['shopping']).order_by(:created_at.desc).first

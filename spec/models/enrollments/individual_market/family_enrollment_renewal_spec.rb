@@ -235,22 +235,24 @@ if ExchangeTestingConfigurationHelper.individual_market_is_enabled?
           context 'age_off_excluded for children set to true' do
             before do
               update_age_off_excluded(family, true)
+              @renewal = subject.renew
             end
 
             it 'should include child1' do
-              expect(subject.renew.hbx_enrollment_members.map(&:applicant_id)).to include(child1.id)
-              expect(subject.renew.hbx_enrollment_members.map(&:applicant_id)).to include(child2.id)
+              expect(@renewal.hbx_enrollment_members.map(&:applicant_id)).to include(child1.id)
+              expect(@renewal.hbx_enrollment_members.map(&:applicant_id)).to include(child2.id)
             end
           end
 
           context 'age_off_excluded for children set to false' do
             before do
               update_age_off_excluded(family, false)
+              @renewal = subject.renew
             end
 
             it 'should not include child1' do
-              expect(subject.renew.hbx_enrollment_members.map(&:applicant_id)).not_to include(child1.id)
-              expect(subject.renew.hbx_enrollment_members.map(&:applicant_id)).to include(child2.id)
+              expect(@renewal.hbx_enrollment_members.map(&:applicant_id)).not_to include(child1.id)
+              expect(@renewal.hbx_enrollment_members.map(&:applicant_id)).to include(child2.id)
             end
           end
         end
@@ -1129,6 +1131,53 @@ if ExchangeTestingConfigurationHelper.individual_market_is_enabled?
 
           it "should return new renewal enrollment without catastrophic product" do
             expect(subject.renew.product.metal_level_kind).not_to be :catastrophic
+          end
+        end
+
+        context "renew with eligibility member change" do
+          let(:eligible_member) { subject.enrollment.hbx_enrollment_members.last.family_member.person.update(is_applying_coverage: false) }
+          let!(:renewal_product) { FactoryBot.create(:renewal_ivl_silver_health_product,  hios_id: "11111111122302-04", hios_base_id: "11111111122302", csr_variant_id: "04") }
+          let!(:current_product) { FactoryBot.create(:active_ivl_silver_health_product, hios_id: "11111111122302-04", hios_base_id: "11111111122302", csr_variant_id: "04", renewal_product_id: renewal_product.id) }
+          let!(:csr_product) { FactoryBot.create(:renewal_ivl_silver_health_product, hios_id: "11111111122302-05", hios_base_id: "11111111122302", csr_variant_id: "05") }
+
+          subject do
+            catastrophic_ivl_enrollment.product = current_product
+            catastrophic_ivl_enrollment.save
+            enrollment_renewal = Enrollments::IndividualMarket::FamilyEnrollmentRenewal.new
+            enrollment_renewal.enrollment = catastrophic_ivl_enrollment
+            enrollment_renewal.assisted = true
+            enrollment_renewal.aptc_values = {:applied_percentage => 1, :applied_aptc => 730.0, :max_aptc => 730.0} #, :csr_amt => 73}
+            enrollment_renewal.renewal_coverage_start = Date.new(Date.current.year + 1,1,1)
+            enrollment_renewal
+          end
+          let(:child1_dob) { current_date.next_month - 30.years }
+
+          let(:eligibility_determination) do
+            determination = Operations::Eligibilities::BuildFamilyDetermination.new.call({ effective_date: catastrophic_ivl_enrollment.effective_on, family: family }).value!
+            determination.subjects.each do |subject|
+              eligibililty_state = subject.eligibility_states.where(eligibility_item_key: "aptc_csr_credit").first
+              eligibililty_state.grants.create(key: 'CsrAdjustmentGrant',
+                                               assistance_year: Date.current.year + 1,
+                                               value: "73",
+                                               start_on: TimeKeeper.date_of_record.beginning_of_year,
+                                               end_on: TimeKeeper.date_of_record.end_of_year,
+                                               member_ids: family.family_members.map(&:id))
+            end
+            determination
+          end
+
+          before do
+            allow(EnrollRegistry[:temporary_configuration_enable_multi_tax_household_feature].feature).to receive(:is_enabled).and_return(true)
+            enrollment_members = subject.enrollment.hbx_enrollment_members
+            eligibile_family_member_ids = enrollment_members.map(&:family_member).map(&:person).map(&:id)
+            enrollment_members.last.family_member.person.consumer_role.update(is_applying_coverage: false)
+            eligible_subject = eligibility_determination.subjects.select{|sub| sub.person_id == eligibile_family_member_ids.first.to_s}.last
+            eligible_subject.eligibility_states.where(eligibility_item_key: "aptc_csr_credit").first.grants.first.update_attributes!(value: "87")
+            allow(::Operations::Products::ProductOfferedInServiceArea).to receive(:new).and_return(double(call: double(:success? => true)))
+          end
+
+          it "should return new renewal product with applied aptc" do
+            expect(subject.renew.product).to eq csr_product
           end
         end
 
