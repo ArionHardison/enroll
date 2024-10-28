@@ -29,7 +29,7 @@
             <table>
               <tbody>
               <tr>
-                <th><%= l10n('recipient') %>:</th>
+                <th class="weight-n"><%= l10n('recipient') %>:</th>
                 <td><b><%=  @resource.try(:full_name) ||  @resource.try(:legal_name) %></b></td>
               </tr>
               <tr>
@@ -162,7 +162,7 @@
   }
   <% if @bs4 %>
     $('.btn-confirmation').on('click', function() {
-        confirmSecureMsg(event); 
+        confirmSecureMsg(event);
         return false;
     });
 

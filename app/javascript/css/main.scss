@@ -263,6 +263,11 @@ body {
   border: 1px solid var(--grey-060);
 }
 
+// component - for pre-bs4 create sep page
+.manage_sep_types form.form-horizontal small.text-muted {
+  display: none;
+}
+
 // component - message inbox
 .msg-inbox {
   cursor: pointer;
