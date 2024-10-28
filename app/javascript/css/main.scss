@@ -145,6 +145,10 @@ body {
   }
 }
 
+a.btn-nav-accordion, a.btn-nav-accordion:hover {
+  color: var(--default-font-color)
+}
+
 // pagination, move to own partial
 .pagination {
   li {
