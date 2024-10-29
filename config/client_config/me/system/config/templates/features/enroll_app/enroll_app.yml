@@ -243,7 +243,7 @@ registry:
           - key: :geographic_rating_area_model
             item: 'county'
           - key: :assistance_estimate_url
-            item: 'https://dc.checkbookhealth.org/hie/dc/2021/index.cfm?page'
+            item: 'https://me25.checkbookhealth.org/#/'
           - key: :benchmark_product_model
             item: :health_only
           - key: :dental_plan_years_available
