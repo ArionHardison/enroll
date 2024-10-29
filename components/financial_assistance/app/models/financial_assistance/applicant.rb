@@ -638,7 +638,7 @@ module FinancialAssistance
     end
 
     def invalid_family_relationships
-      invalid_relations = [invalid_spousal_relationship, invalid_child_relationship, invalid_in_law_relationships, invalid_sibling_relationship]
+      invalid_relations = [invalid_spousal_relationship, invalid_child_relationship, invalid_in_law_relationships, invalid_sibling_relationship, invalid_parent_relationship]
 
       invalid_relations.flatten.compact.collect(&:id)
     end
@@ -673,6 +673,17 @@ module FinancialAssistance
       domestic_partner_relationship_relative = relationships.where(relative_id: domestic_partner_relationship.relative.id).first
       return if domestic_partner_relationship_relative.blank?
       return domestic_partner_relationship_relative unless ['domestic_partners_child', 'child'].include?(domestic_partner_relationship_relative.kind)
+    end
+
+    def invalid_parent_relationship
+      parent_relationships = relationships.where(kind: 'parent')
+      return unless parent_relationships.present?
+      children = parent_relationships.collect(&:relative)
+      children.collect do |child|
+        child_parent_relationships = child.relationships.where(kind: 'parent')
+        next unless child_parent_relationships.present?
+        return child if child_parent_relationships.collect(&:relative_id).any? { |relative_id| parent_relationships.collect(&:relative_id).include?(relative_id) }
+      end
     end
 
     def invalid_in_law_relationships

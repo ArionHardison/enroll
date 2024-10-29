@@ -1323,6 +1323,58 @@ RSpec.describe ::FinancialAssistance::Applicant, type: :model, dbclean: :after_e
           expect(applicant4.invalid_family_relationships.present?).to eql(true)
         end
       end
+
+      context "invalid parent relationships" do
+        let(:set_up_relationships) do
+          application.ensure_relationship_with_primary(applicant2, 'spouse')
+          application.ensure_relationship_with_primary(applicant3, 'child')
+          application.ensure_relationship_with_primary(applicant4, 'child')
+          application.ensure_relationship_with_primary(applicant5, 'child')
+          application.add_or_update_relationships(applicant2, applicant3, 'child')
+          application.add_or_update_relationships(applicant2, applicant4, 'child')
+          application.add_or_update_relationships(applicant2, applicant5, 'child')
+          application.add_or_update_relationships(applicant3, applicant4, 'parent')
+          application.add_or_update_relationships(applicant3, applicant5, 'sibling')
+          application.add_or_update_relationships(applicant4, applicant5, 'sibling')
+
+          application.build_relationship_matrix
+          application.save(validate: false)
+        end
+
+        before do
+          set_up_relationships
+        end
+
+        it "fails validation" do
+          expect(applicant.invalid_family_relationships.present?).to eql(true)
+        end
+      end
+
+      context "valid parent relationships" do
+        let(:set_up_relationships) do
+          application.ensure_relationship_with_primary(applicant2, 'spouse')
+          application.ensure_relationship_with_primary(applicant3, 'child')
+          application.ensure_relationship_with_primary(applicant4, 'child')
+          application.ensure_relationship_with_primary(applicant5, 'child')
+          application.add_or_update_relationships(applicant2, applicant3, 'child')
+          application.add_or_update_relationships(applicant2, applicant4, 'child')
+          application.add_or_update_relationships(applicant2, applicant5, 'child')
+          application.add_or_update_relationships(applicant3, applicant4, 'sibling')
+          application.add_or_update_relationships(applicant3, applicant5, 'sibling')
+          application.add_or_update_relationships(applicant4, applicant5, 'sibling')
+
+          application.build_relationship_matrix
+          application.save(validate: false)
+        end
+
+        before do
+          set_up_relationships
+        end
+
+        it "passes validation" do
+          expect(applicant.invalid_family_relationships.present?).to eql(false)
+        end
+      end
     end
   end
 
