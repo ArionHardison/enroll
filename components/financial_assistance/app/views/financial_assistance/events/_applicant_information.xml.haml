@@ -49,7 +49,7 @@
     - if !applicant.age_left_foster_care.nil?
       %age_left_foster_care= applicant.age_left_foster_care
     - if !applicant.foster_care_us_state.nil?
-      %foster_care_us_state= "urn:openhbx:terms:v1:us_state##{State::NAME_IDS.detect do |state| state.last==applicant.foster_care_us_state.upcase end.first.downcase.gsub(' ','_')}"
+      %foster_care_us_state= "urn:openhbx:terms:v1:us_state##{State::NAMES_AND_IDS.detect do |state| state.last==applicant.foster_care_us_state.upcase end.first.downcase.gsub(' ','_')}"
     - if !applicant.had_medicaid_during_foster_care.nil?
       %had_medicaid_during_foster_care= applicant.had_medicaid_during_foster_care
 - unless applicant.is_pregnant.nil?

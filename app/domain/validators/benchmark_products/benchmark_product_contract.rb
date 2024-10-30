@@ -17,7 +17,7 @@ module Validators
         optional(:rating_address).hash do
           required(:county).filled(:string)
           required(:zip).filled(:string)
-          required(:state).filled(included_in?: State::NAME_IDS.map(&:last))
+          required(:state).filled(included_in?: State::STATE_IDS)
         end
 
         required(:households).array(:hash) do

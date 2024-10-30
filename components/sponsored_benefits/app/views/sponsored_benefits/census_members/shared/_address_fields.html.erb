@@ -26,7 +26,7 @@
         <%- link_to image_tag('delete.png'), 'javascript:void(0)', class: 'close-2' %>
       </div>
     </div>
-    
+
   <% flag = false %>
     <div class="row row-form-wrapper no-buffer address-row">
       <div class="col-md-6 col-sm-6 col-xs-12 form-group form-group-lg no-pd">
@@ -43,7 +43,7 @@
         <%= f.text_field :city, placeholder: "CITY", class: "floatlabel form-control", required: required, :readonly => flag  %>
       </div>
       <div class="col-md-4 col-sm-4 col-xs-12 form-group form-group-lg no-pd">
-        <%= f.select(:state, options_for_select(State::NAME_IDS.map(&:last).sort, selected: f.object.state), {include_blank: "SELECT STATE"}, {:disabled => flag})  %>
+        <%= f.select(:state, options_for_select(State::STATE_IDS, selected: f.object.state), {include_blank: "SELECT STATE"}, {:disabled => flag})  %>
       </div>
       <div class="col-md-4 col-sm-4 col-xs-12 form-group form-group-lg no-pd">
         <%= f.text_field :zip, placeholder: "ZIP", class: "floatlabel form-control zip", required: required, :readonly => flag  %>

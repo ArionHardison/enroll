@@ -104,7 +104,7 @@
           <legend>
             <label class="weight-n" for="foster_care_us_state"><%= applicant_prompt("foster_care_state") %></label>
           </legend>
-          <%= f.select :foster_care_us_state, options_for_select(State::NAME_IDS, selected: @applicant.foster_care_us_state), {:include_blank => "NONE"}, id: 'foster_care_us_state', class: "col-4", prompt: true %>
+          <%= f.select :foster_care_us_state, options_for_select(State::NAMES_AND_IDS, selected: @applicant.foster_care_us_state), {:include_blank => "NONE"}, id: 'foster_care_us_state', class: "col-4", prompt: true %>
         </fieldset>
 
         <fieldset class="mb-4 row-form-wrapper">
@@ -420,7 +420,7 @@
             </div>
             <div class='col-md-2'>
               <label></label>
-              <%= f.select(:foster_care_us_state, options_for_select(State::NAME_IDS, selected: @applicant.foster_care_us_state), {:include_blank => "NONE"}, {:id => 'foster_care_us_state', :class => "form-control", :prompt => true}) %>
+              <%= f.select(:foster_care_us_state, options_for_select(State::NAMES_AND_IDS, selected: @applicant.foster_care_us_state), {:include_blank => "NONE"}, {:id => 'foster_care_us_state', :class => "form-control", :prompt => true}) %>
             </div>
           </div>
 

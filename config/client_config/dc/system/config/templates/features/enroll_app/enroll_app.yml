@@ -934,4 +934,6 @@ registry:
       - key: :reset_password_lock_unlock_user
         item: :reset_password_lock_unlock_user
         is_enabled: <%= ENV['ADMIN_RESET_USER_PASSWORD_AND_LOCK_UNLOCK_USER_IS_ENABLED'] || false %>
-
+      - key: :increase_state_client_prominence
+        item: :increase_state_client_prominence
+        is_enabled: <%= ENV['INCREASE_STATE_CLIENT_PROMINENCE_IS_ENABLED'] || false %>

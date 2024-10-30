@@ -28,7 +28,7 @@
     </div>
     <div class="col-md-3 col-sm-12 col-xs-12">
       <%= f.label :state, l10n("state"), class: "required" %>
-      <%= f.select :state, options_for_select(State::NAME_IDS.map(&:last).sort_by { |c| c }, selected: f.object.try(:state)), { include_blank: l10n("select_state") }, class: 'form-control mb-1', required: true %>
+      <%= f.select :state, options_for_select(State::STATE_IDS, selected: f.object.try(:state)), { include_blank: l10n("select_state") }, class: 'form-control mb-1', required: true %>
       <div class="invalid-feedback">
         <%= l10n('address.state_error') %>
       </div>

@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
+# Model for storing the names and IDs of US states and legal territories.
 class State
   include Mongoid::Document
 
-  NAME_IDS = [
+  STATE_LIST = [
     ["Alabama", "AL"],
     ["Alaska", "AK"],
     ["American Samoa", "AS"],
@@ -61,4 +62,8 @@ class State
     ["Wisconsin", "WI"],
     ["Wyoming", "WY"]
   ].freeze
+
+  CLIENT_STATE = EnrollRegistry.feature_enabled?(:increase_state_client_prominence) ? [EnrollRegistry[:enroll_app].setting(:state_name).item, EnrollRegistry[:enroll_app].setting(:site_key).item.to_s.upcase].freeze : nil
+  STATE_IDS = STATE_LIST.dup.map(&:last).sort.unshift(CLIENT_STATE&.last).compact.freeze
+  NAMES_AND_IDS = STATE_LIST.dup.unshift(CLIENT_STATE).compact.freeze
 end

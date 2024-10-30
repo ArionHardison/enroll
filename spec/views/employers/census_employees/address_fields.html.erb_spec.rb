@@ -20,11 +20,11 @@ describe "employers/census_employees/_address_fields.html.erb" do
   end
 
   it "should have many options for state field" do
-    expect(rendered).to have_selector("option", count: State::NAME_IDS.count + 1)
-    State::NAME_IDS.each do |item|
+    expect(rendered).to have_selector("option", count: State::STATE_IDS.count + 1)
+    State::STATE_IDS.each do |item|
       # TODO: Appears more than once for Maine - why?
       # expect(rendered).to have_selector("option[value='#{item.last}']", count: 1)
-      expect(rendered).to have_selector("option[value='#{item.last}']")
+      expect(rendered).to have_selector("option[value='#{item}']")
     end
   end
 end

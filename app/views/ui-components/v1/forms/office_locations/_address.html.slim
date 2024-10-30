@@ -27,7 +27,7 @@
         | Please provide a valid city.
     .col-md-3.col-sm-12.col-xs-12
       label for="inputState" = l10n('employers.registration.state')
-      = f.select(:state, options_for_select(State::NAME_IDS.map(&:last).sort_by {|c| c }, selected: f.object.try(:state)), {include_blank: "SELECT STATE"}, class:'form-control mb-1', id:'inputState', required: true)
+      = f.select(:state, options_for_select(State::STATE_IDS, selected: f.object.try(:state)), {include_blank: "SELECT STATE"}, class:'form-control mb-1', id:'inputState', required: true)
       .invalid-feedback
         | Please select a state.
     .col-md-3.col-sm-12.col-xs-12

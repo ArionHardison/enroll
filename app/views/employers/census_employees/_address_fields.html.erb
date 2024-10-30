@@ -57,7 +57,7 @@
         <%= f.text_field :city, placeholder: l10n("address.city_text"), class: "floatlabel form-control", required: true, :readonly => flag  %>
       </div>
       <div class="col-md-4 col-sm-4 col-xs-12 form-group form-group-lg no-pd">
-        <%= f.select(:state, options_for_select(State::NAME_IDS.map(&:last).sort, selected: f.object.state), {include_blank: l10n("address.select_state_text")}, {:disabled => flag})  %>
+        <%= f.select(:state, options_for_select(State::STATE_IDS, selected: f.object.state), {include_blank: l10n("address.select_state_text")}, {:disabled => flag})  %>
       </div>
       <div class="col-md-4 col-sm-4 col-xs-12 form-group form-group-lg no-pd">
         <%= f.text_field :zip, placeholder: l10n("address.zip_text"), class: "floatlabel form-control zip", required: true, :readonly => flag  %>

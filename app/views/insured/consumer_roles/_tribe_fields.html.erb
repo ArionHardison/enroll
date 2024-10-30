@@ -41,7 +41,7 @@
             </div>
           </div>
         </div>
-        <%= f.select(:tribal_state, options_for_select(State::NAME_IDS, selected: f.object.tribal_state), {include_blank: l10n("insured.consumer_roles.select_state")}, id: "tribal-state")  %>
+        <%= f.select(:tribal_state, options_for_select(State::STATE_IDS, selected: f.object.tribal_state), {include_blank: l10n("insured.consumer_roles.select_state")}, id: "tribal-state")  %>
       </div>
 
       <fieldset class="mb-4 d-block featured-tribe-container hide">
@@ -130,7 +130,7 @@
         <label><%= l10n("insured.tribal_state") %></label>
         </div>
         <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 form-group form-group-lg no-pd border_bottom_zero">
-          <%= f.select(:tribal_state, options_for_select(State::NAME_IDS.map(&:last), selected: f.object.tribal_state), {include_blank: "SELECT STATE"}, id: "tribal-state")  %>
+          <%= f.select(:tribal_state, options_for_select(State::STATE_IDS, selected: f.object.tribal_state), {include_blank: "SELECT STATE"}, id: "tribal-state")  %>
         </div>
         <div id="tribal-state-alert" class="alert alert-warning alert-dismissible no-buffer hidden_field" role="alert">
           <button type="button" class="close" aria-label="Close">

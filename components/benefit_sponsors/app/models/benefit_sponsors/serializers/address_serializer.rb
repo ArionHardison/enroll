@@ -14,14 +14,14 @@ module BenefitSponsors
       end
 
       def state_options
-        ::State::NAME_IDS
+        ::State::NAMES_AND_IDS
       end
 
       # provide defaults(if any needed) that were not set on Model
       def attributes(*args)
         hash = super
         unless object.persisted?
-          
+
         end
         hash
       end

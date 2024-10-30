@@ -55,7 +55,7 @@
               </div>
               <div class="col-sm col-md-6 pr-0">
                 <%= address.label :state, class: "required" %>
-                <%= address.select(:state, options_for_select(State::NAME_IDS.map(&:last).sort, selected: address.object.try(:state)), {include_blank: "SELECT STATE"}, class:"w-100 stateInput required", required: true) %>
+                <%= address.select(:state, options_for_select(State::STATE_IDS, selected: address.object.try(:state)), {include_blank: "SELECT STATE"}, class:"w-100 stateInput required", required: true) %>
               </div>
             </div>
             <div class="d-flex col-sm col-md-6 pr-0">
@@ -161,7 +161,7 @@
             <%= address.text_field :city, placeholder: "CITY #{'*' if required.present?}", class: "floatlabel form-control #{required}", required: required.present? %>
           </div>
           <div class=" col-sm-<%= "#{col_size}" %> col-xs-12 form-group form-group-lg no-pd">
-            <%= address.select(:state, options_for_select(State::NAME_IDS.map(&:last).sort, selected: address.object.state), {include_blank: "SELECT STATE #{'*' if required.present?}"}, { required: required.present?, id: "state_id_#{kind}" }) %>
+            <%= address.select(:state, options_for_select(State::STATE_IDS, selected: address.object.state), {include_blank: "SELECT STATE #{'*' if required.present?}"}, { required: required.present?, id: "state_id_#{kind}" }) %>
           </div>
 
           <div data-controller="zip-check">
