@@ -627,6 +627,36 @@ RSpec.describe ApplicationHelper, :type => :helper do
     end
   end
 
+  describe "#home_page_path" do
+
+    let(:person) {FactoryBot.create(:person, :with_consumer_role)}
+    let(:user) { FactoryBot.create(:user, person: person) }
+
+    before do
+      allow(person.consumer_role).to receive(:identity_verified?).and_return(true)
+      allow(helper).to receive(:current_user).and_return(user)
+    end
+
+    context "consumer portal" do
+      it "returns family home page" do
+        expect(helper.home_page_path).to eq family_account_path
+      end
+    end
+
+    context "admin portal" do
+      let(:admin_person) {FactoryBot.create(:person, :with_hbx_staff_role)}
+      let(:admin_user) { FactoryBot.create(:user, person: admin_person) }
+
+      before do
+        allow(helper).to receive(:current_user).and_return(admin_user)
+      end
+
+      it "returns admin index" do
+        expect(helper.home_page_path).to eq exchanges_hbx_profiles_root_path
+      end
+    end
+  end
+
   describe "show_default_ga?", dbclean: :after_each do
     let(:general_agency_profile) { FactoryBot.create(:general_agency_profile, :shop_agency) }
     let(:broker_agency_profile) { FactoryBot.create(:broker_agency_profile, :shop_agency) }

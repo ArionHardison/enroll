@@ -57,6 +57,15 @@ module ApplicationHelper
     end
   end
 
+  def home_page_path
+    return unless current_user
+    if current_user.has_hbx_staff_role?
+      main_app.exchanges_hbx_profiles_root_path
+    elsif current_user.identity_verified? || (current_user.has_consumer_role? && current_user.person.consumer_role.identity_verified?)
+      main_app.family_account_path
+    end
+  end
+
   def can_employee_shop?(date)
     return false if date.blank?
     date = Date.strptime(date.to_s,"%m/%d/%Y")
