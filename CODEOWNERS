@@ -6,3 +6,4 @@ Gemfile* @ideacrew/merge-shepherds
 config/brakeman.ignore @ideacrew/merge-shepherds
 .docker/ @ideacrew/cicd-mantainers
 .github/ @ideacrew/cicd-mantainers
+app/javascript/css/ @ideacrew/ui-team
