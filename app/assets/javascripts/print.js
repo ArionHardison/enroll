@@ -38,3 +38,10 @@ function printElement(elem, append, delimiter) {
 
   $printSection.appendChild(domClone);
 }
+
+window.addEventListener("afterprint", (event) => {
+  printArea = document.querySelector("#printSection")
+  if (printArea) {
+    printArea.remove()
+  }
+});
