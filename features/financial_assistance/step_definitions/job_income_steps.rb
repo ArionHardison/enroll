@@ -230,7 +230,8 @@ Then(/^the user should see the popup for the (.*) income question$/) do |income_
     popup_text = "Select ‘yes’ if this person owns a business or receives a federal form 1099 from any employer. " \
     "We need to know about any income this person receives as an independent contractor or from a business they own."
   when 'unemployment'
-    popup_text = "Select ‘yes’ if this person received one or more types of unemployment income listed below at any point in #{application.assistance_year}"
+    assistance_year = FinancialAssistance::Operations::EnrollmentDates::ApplicationYear.new.call.value!.to_s
+    popup_text = "Select ‘yes’ if this person received one or more types of unemployment income listed below at any point in #{assistance_year}"
   end
   expect(page).to have_content(popup_text)
 end

@@ -3,7 +3,7 @@
 require 'rails_helper'
 
 describe ::FinancialAssistance::Services::SummaryService do
-  assistance_year = TimeKeeper.date_of_record.year
+  assistance_year = FinancialAssistance::Operations::EnrollmentDates::ApplicationYear.new.call.value!
   let!(:application) { FactoryBot.create(:application, family_id: BSON::ObjectId.new, assistance_year: assistance_year) }
   let(:cfl_service) { ::FinancialAssistance::Services::ConditionalFieldsLookupService.new }
 
@@ -313,7 +313,7 @@ describe ::FinancialAssistance::Services::SummaryService do
                             "Did this person have MaineCare (Medicaid) or Cub Care (Children's Health Insurance Program) that will end soon or that recently ended because of a change in eligibility?",
                             "Has this person's household income or household size changed since they were told their coverage was ending?",
                             "What's the last day of this person’s Medicaid or CHIP coverage?",
-                            "Was this person found not eligible for MaineCare (Medicaid) or Cub Care (Children's Health Insurance Program) based on their immigration status since 2019",
+                            "Was this person found not eligible for MaineCare (Medicaid) or Cub Care (Children's Health Insurance Program) based on their immigration status since #{assistance_year - 5}",
                             "Has this person’s immigration status changed since they were not found eligible for MaineCare (Medicaid) or Cub Care (Children’s Health Insurance Program)"
                           ],
                           precondition: {

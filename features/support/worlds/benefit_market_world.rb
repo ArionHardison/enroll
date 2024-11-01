@@ -103,7 +103,11 @@ module BenefitMarketWorld
   def renewal_application_dates(status)
     case status
     when :draft, :enrollment_open
-      current_effective_date((TimeKeeper.date_of_record + 2.months).beginning_of_month.prev_year)
+      if TimeKeeper.date_of_record.month == 11
+        current_effective_date((TimeKeeper.date_of_record + 1.months).beginning_of_month.prev_year)
+      else
+        current_effective_date((TimeKeeper.date_of_record + 2.months).beginning_of_month.prev_year)
+      end
     when :enrollment_closed, :enrollment_eligible, :enrollment_extended
       current_effective_date((TimeKeeper.date_of_record + 1.months).beginning_of_month.prev_year)
     when :active, :terminated, :termination_pending, :expired, :retroactive_canceled
