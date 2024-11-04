@@ -290,9 +290,7 @@ class Family
     )
   }
 
-  scope :eligibility_determination_outstanding_verifications, -> (skip = 0, limit = 50, order_by = { :'eligibility_determination.outstanding_verification_earliest_due_date' => :asc }){
-        where(:'eligibility_determination.outstanding_verification_status' => 'outstanding').limit(limit).skip(skip).order_by(order_by)
-      }
+  scope :eligibility_determination_outstanding_verifications, -> { where(:'eligibility_determination.outstanding_verification_status' => 'outstanding') }
 
   scope :eligibility_determination_family_member_search, ->(search_string){
       any_of(
@@ -1234,6 +1232,21 @@ class Family
     def application_applicable_year
       bcp = HbxProfile.bcp_by_oe_dates
       bcp&.start_on&.year || TimeKeeper.date_of_record.year
+    end
+
+    def sort_by_eligible_primary_full_name_pipeline(sort_direction)
+      [
+        { :$unwind => "$eligibility_determination.subjects" },
+        { :$match => { "eligibility_determination.subjects.is_primary": true } },
+        { :$project => { '_id': 1, 'eligibility_determination.subjects.full_name': 1 } },
+        { :$sort => { "eligibility_determination.subjects.full_name": sort_direction } }
+      ]
+    end
+
+    def sort_by_eligible_verification_earliest_due_date_pipeline(sort_direction)
+      [
+        { :$sort => { 'eligibility_determination.outstanding_verification_earliest_due_date': sort_direction } }
+      ]
     end
   end
 
