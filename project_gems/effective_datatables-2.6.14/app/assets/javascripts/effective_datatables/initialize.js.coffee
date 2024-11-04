@@ -35,6 +35,14 @@
           exportOptions:
             format:
               header: (str) -> $("<div>#{str}</div>").children('.filter-label').first().text()
+              body: (data, row, column, node) ->
+                data = data.toString()
+                family_dt_pattern = /<a\s+rel="noopener noreferrer"\s+href="\/exchanges\/agents\/resume_enrollment\?person_id/
+                containsFamilyDtPattern = family_dt_pattern.test(data)
+                if containsFamilyDtPattern
+                  node.innerText
+                else
+                  data
             columns: ':not(.col-actions)'
         },
         {
@@ -42,6 +50,14 @@
           exportOptions:
             format:
               header: (str) -> $("<div>#{str}</div>").children('.filter-label').first().text()
+              body: (data, row, column, node) ->
+                data = data.toString()
+                family_dt_pattern = /<a\s+rel="noopener noreferrer"\s+href="\/exchanges\/agents\/resume_enrollment\?person_id/
+                containsFamilyDtPattern = family_dt_pattern.test(data)
+                if containsFamilyDtPattern
+                  node.innerText
+                else
+                  data
             columns: ':not(.col-actions)'
         },
         # {
