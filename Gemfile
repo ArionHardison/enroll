@@ -92,6 +92,8 @@ gem 'redis',                    '~> 4.0'
 gem 'redis-rails',              '~> 5.0.2'
 gem 'redis-store',              '~> 1.10'
 gem 'rexml',                    '>= 3.3.9'
+# Resque indirectly depends on Sinatra. We're aware of CVE-2024-21510 in Sinatra,
+# but it doesn't affect our usage. See .bundler-audit.yml for mitigation.
 gem 'resque',                   '~> 2.6.0'
 gem 'roo',                      '~> 2.10'
 gem 'rubyzip', '>= 1.3.0'
