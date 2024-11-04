@@ -30,6 +30,10 @@ DT = (function() {
   }
   var bs4 = document.documentElement.dataset.bs4;
   var filters = function(){
+    if (bs4) {
+      $(".sub_level + br").remove()
+      $('.sub_level').addClass('mt-3')
+    }
     $('.custom_level_1').removeClass('hide')
     $('.custom_filter .btn-default').click(function() {
       var that = this

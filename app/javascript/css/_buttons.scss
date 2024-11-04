@@ -250,3 +250,13 @@ button.text-button {
     color: var(--button-primary-active-color);
   }
 }
+
+.btn-group {
+  border-radius: 4px;
+  button:not(:last-child), .btn:not(:last-child) {
+    margin-right: 2px
+  }
+  button:not(:first-child), .btn:not(:first-child) {
+    margin-left: 2px
+  }
+}
