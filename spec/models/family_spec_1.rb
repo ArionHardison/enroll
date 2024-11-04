@@ -425,11 +425,38 @@ describe ".checkbook_enrollments", dbclean: :after_each do
                         hbx_enrollment_members: [subscriber_enrollment_member])
     end
 
+    before do
+      shopping_enrollment.kind = "individual"
+      shopping_enrollment.effective_on = shopping_enrollment.effective_on + 1.year
+    end
+
     it 'should return renewal_enrollment' do
       current_coverages = family.checkbook_enrollments(shopping_enrollment)
-
       expect(current_coverages).to include(renewal_enrollment.product)
-      expect(current_coverages).not_to include(shopping_enrollment)
+      expect(current_coverages).not_to include(shopping_enrollment.product)
+    end
+  end
+
+  context "when consumer has a renewal but is shopping for current year plan" do
+    let!(:renewal_enrollment) do
+      FactoryBot.create(:hbx_enrollment,
+                        family: family,
+                        effective_on: (effective_on + 1.year).beginning_of_year,
+                        household: family.active_household,
+                        product: renewal_product,
+                        coverage_kind: "health",
+                        aasm_state: 'auto_renewing',
+                        hbx_enrollment_members: [subscriber_enrollment_member])
+    end
+
+    before do
+      shopping_enrollment.kind = "individual"
+    end
+
+    it 'should return the current year plan and not the renewal plan' do
+      current_coverages = family.checkbook_enrollments(shopping_enrollment)
+      expect(current_coverages).not_to include(renewal_enrollment.product)
+      expect(current_coverages).to include(active_enrollment.product)
     end
   end
 

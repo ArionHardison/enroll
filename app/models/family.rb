@@ -471,7 +471,7 @@ class Family
       enr.subscriber.applicant_id == enrollment.subscriber.applicant_id
     end
     return nil unless with_current_subscriber.any?
-    with_current_subscriber.map(&:product)
+    with_current_subscriber.map(&:product).select { |product| product.application_period.min.year == enrollment.coverage_year }
   end
 
   def existing_coverage_query_expr(enrollment, include_matching_effective_date)
