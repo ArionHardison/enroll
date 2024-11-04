@@ -100,7 +100,7 @@
       <% end %>
       <div class='my-4'>
         <label for="admin_comment" class="d-block"><%= l10n('hbx_profiles.enter_comments') %></label>
-        <%= text_area_tag :admin_comment, nil, rows: 3, placeholder: l10n("hbx_profiles.send_message.write_here") %>
+        <%= text_area_tag :admin_comment, nil, rows: 8, class: "w-100", placeholder: l10n("hbx_profiles.send_message.write_here") %>
       </div>
       <div class="px-0">
         <%= submit_tag "Submit",  class: "btn btn-primary", onclick: "PriorPySepModal()", id: "confirm_add_sep"%>

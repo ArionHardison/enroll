@@ -149,6 +149,14 @@ a.btn-nav-accordion, a.btn-nav-accordion:hover {
   color: var(--default-font-color)
 }
 
+.btn-nav-accordion[aria-expanded="true"] .fa-chevron-down {
+  transform: rotate(-90deg);
+}
+
+.btn-nav-accordion[aria-expanded="true"] {
+  transform: rotate(-90deg);
+}
+
 // pagination, move to own partial
 .pagination {
   li {
