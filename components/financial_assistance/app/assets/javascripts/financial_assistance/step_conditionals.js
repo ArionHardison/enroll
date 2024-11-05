@@ -212,26 +212,31 @@ document.addEventListener("turbolinks:load", function() {
   if ($('#eligibility_easier_yes').is(':checked')) {
     $('#eligibility_easier_yes').parents(".row").next().addClass('hide');
     $('#eligibility_easier_yes').parents(".row").next().next().addClass('hide');
+    $('#application_years_to_renew').attr('required', false);
   };
 
   $("body").on("change", "#eligibility_easier_yes", function(){
     if ($('#eligibility_easier_yes').is(':checked')) {
       $('#renewal_years').addClass('hide');
+      $('#application_years_to_renew').attr('required', false);
     };
   });
 
   $("body").on("change", "#eligibility_easier_no", function(){
     if ($('#eligibility_easier_no').is(':checked')) {
       $('#renewal_years').removeClass('hide');
+      $('#application_years_to_renew').attr('required', true);
     };
   });
 
   if($('#eligibility_easier_yes').is(':checked')) {
     $('#renewal_years').addClass('hide');
+    $('#application_years_to_renew').attr('required', false);
   }
 
   if($('#eligibility_easier_no').is(':checked')) {
     $('#renewal_years').removeClass('hide');
+    $('#application_years_to_renew').attr('required', true);
   }
 
 /* Applicant's Tax Info Form Related */
