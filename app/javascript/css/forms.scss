@@ -440,3 +440,11 @@ input[type='date']:invalid::-webkit-datetime-edit {
     outline: 2px solid var(--error-color);
   }
 }
+
+input::-webkit-datetime-edit-day-field:focus,
+input::-webkit-datetime-edit-month-field:focus,
+input::-webkit-datetime-edit-year-field:focus {
+    background-color: var(--primary-color-dark);
+    color: var(--gray-000);
+    outline: none;
+}

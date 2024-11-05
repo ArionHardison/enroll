@@ -2,7 +2,7 @@
 <% if @bs4 %>
   <h1><%= l10n("exchange.broker_applicants.details") %></h1>
   <dl class="parent">
-    <dt><%= l10n("broker_hbx") %> ID:</dt>
+    <dt><%= l10n("exchange.broker_applicants.broker_hbx") %>:</dt>
     <dd><%= @broker_applicant.hbx_id %></dd>
     <dt><%= l10n("applicant_name") %>:</dt>
     <dd><%= @broker_applicant.full_name %></dd>
@@ -54,14 +54,14 @@
         <% all_carrier_appointments.each do |name,value| %>
           <% current_carrier_appointments = @broker_applicant.broker_role.carrier_appointments || [] %>
           <% broker_role_appointed_to_carrier = current_carrier_appointments.include?(name) %>
-          <%= label_tag "person[broker_role_attributes][carrier_appointments][#{name}]", class: "weight-n" do %>
+          <%= label_tag "person[broker_role_attributes][carrier_appointments][#{name}]", class: "weight-n d-flex align-items-center" do %>
             <% unless broker_carrier_appointments_enabled? %>
               <%= check_box_tag "person[broker_role_attributes][carrier_appointments][#{name}]", "true", broker_role_appointed_to_carrier ? true : false %>
             <% else %>
               <%= check_box_tag "person[broker_role_attributes][carrier_appointments][#{name}]", "true",
                   broker_role_appointed_to_carrier ? true : false, disabled: false %>
             <% end %>
-            <%= name == "united_health_care" ? "UnitedHealthcare" : name %>
+            <span class="ml-1"><%= name == "united_health_care" ? "UnitedHealthcare" : name %></span>
           <% end %>
         <% end %>
       </fieldset>

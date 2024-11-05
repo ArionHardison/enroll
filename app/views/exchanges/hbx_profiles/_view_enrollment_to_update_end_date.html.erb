@@ -69,7 +69,7 @@
 
     <% if @bs4 %>
       $('.btn-confirmation').on('click', function(event) {
-        confirmUpdateEndDate(event); 
+        confirmUpdateEndDate(event);
         return false;
       });
     <% end %>
@@ -81,7 +81,7 @@
         <%= form_tag update_enrollment_terminated_on_date_exchanges_hbx_profiles_path, :method => :post, remote: true, id: 'termiante_with_earlier_date-form' do %>
             <h3 class='title'><%= l10n('hbx_profiles.enrollment_end_date.header')%></h3>
             <br />
-            <table  class="table table-striped">
+            <table  class="table table-striped vertically-center">
               <tr>
                 <th><%= l10n('insured.families.hbx_id') %></th>
                 <th><%= l10n('plan') %></th>
@@ -103,7 +103,7 @@
                     <% term_or_expire_date = hbx.fetch_term_or_expiration_date %>
                     <td><%= term_or_expire_date %></td>
                     <td>
-                      <% max_date = hbx.prior_plan_year_coverage? || hbx.active_plan_year_coverage? ? (hbx.is_shop? ? hbx.sponsored_benefit_package.end_on : hbx.effective_on.end_of_year) : hbx.terminated_on %> 
+                      <% max_date = hbx.prior_plan_year_coverage? || hbx.active_plan_year_coverage? ? (hbx.is_shop? ? hbx.sponsored_benefit_package.end_on : hbx.effective_on.end_of_year) : hbx.terminated_on %>
                       <%= date_field_tag :new_termination_date, nil, disabled: true, value: date_field_value(term_or_expire_date), id: "termination-date-picker_#{hbx.id}", min: date_field_value(hbx.effective_on), max: date_field_value(max_date), 'aria-labelledby': "end_date_header" %>
                     </td>
                     <td><%= check_box_tag "edi_required", hbx.id, false, disabled: true, 'aria-labelledby': "transmit_header" %></td>

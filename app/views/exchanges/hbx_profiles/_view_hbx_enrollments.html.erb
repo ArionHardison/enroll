@@ -2,7 +2,7 @@
   <div class = "col-sm-11 table-responsive" id="terminated_enrollemnts">
     <% if @enrollments.present? %>
         <%= form_tag reinstate_enrollment_exchanges_hbx_profiles_path, method: :post, id: 'reinstate-form' do %>
-            <table class = "table table-striped table-bordered">
+            <table class = "table table-striped table-bordered vertically-center">
               <thead>
               <tr>
                 <th><%= l10n('hbx_profiles.reinstate.plans') %></th>

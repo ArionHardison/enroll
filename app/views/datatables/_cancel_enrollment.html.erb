@@ -19,7 +19,7 @@
     <% if @hbxs.present? %>
       <%= form_tag update_cancel_enrollment_exchanges_hbx_profiles_path, :method => :post, remote: true do %>
         <h3><%= l10n('hbx_profiles.cancel.header') %></h3>
-        <table  class="table table-striped">
+        <table  class="table table-striped vertically-center">
           <tr>
             <th><%= l10n('insured.families.hbx_id') %></th>
             <th><%= l10n('plan') %></th>

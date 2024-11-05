@@ -4,9 +4,10 @@
       <div class="container px-0">
         <ul id="myTab" class="list-unstyled list-inline m-0 p-0" role="tablist">
           <li class="pl-0" role="presentation">
-            <a>
-              <%= h(link_to(l10n('layout.header.home'), main_app.exchanges_hbx_profiles_path, "aria-expanded" => "true", "aria-controls" => "hbx_profile", "role" => "tab" )) %>
-            </a>
+            <%= h(link_to(main_app.exchanges_hbx_profiles_path, "aria-expanded" => "true", "aria-controls" => "hbx_profile", "role" => "tab") do %>
+                <i class="fas fa-home fa-lg" aria-hidden="true"></i>
+                <span class="sr-only"><%= l10n('layout.header.home') %></span>
+              <% end) %>
           </li>
           <% if individual_market_is_enabled? %>
             <li class="dropdown pl-1" role="presentation">
@@ -50,13 +51,8 @@
               </a>
             </li>
           <% end %>
-
           <% if aca_user_accounts_enabled %>
-            <li role="presentation">
-              <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                <%= render partial: 'exchanges/hbx_profiles/shared/nav_link', locals: {tab_name: 'user-account', link_path: main_app.user_account_index_exchanges_hbx_profiles_path, display_name: 'User Accounts', active_tab: "user-account", remote: false, pundit_object: HbxProfile, pundit_method: :can_access_user_account_tab?} %>
-              </a>
-            </li>
+            <%= render partial: 'exchanges/hbx_profiles/shared/nav_link', locals: {tab_name: 'user-account', link_path: main_app.user_account_index_exchanges_hbx_profiles_path, display_name: 'User Accounts', active_tab: "user-account", remote: false, pundit_object: HbxProfile, pundit_method: :can_access_user_account_tab?} %>
             <% if EnrollRegistry.feature_enabled?(:issuers_tab) %>
               <li role="presentation">
                 <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">

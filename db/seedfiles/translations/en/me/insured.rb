@@ -46,7 +46,7 @@ The I-94 number is also called the admissions number. It is an 11 character sequ
   :'en.insured.consumer_roles.dependent_error.header' => "Correct the following to add this family member:",
   :'en.insured.consumer_roles.dependent_error.gender' => "Gender can't be blank",
   :'en.insured.consumer_roles.dependent_error.sex' => "Sex can't be blank",
-  :'en.insured.consumer_roles.help_question_info' => "Enter your personal information and answer the following questions. When you're finished, select CONTINUE.",
+  :'en.insured.consumer_roles.help_question_info' => "Enter your personal information and answer the following questions. When you're finished, select 'Continue to Next Step'.",
   :'en.required_field' => "required field",
   :'en.warning' => "Warning",
   :'en.insured.consumer_roles.naturalized_question' => "Is this person a naturalized or derived citizen?",
