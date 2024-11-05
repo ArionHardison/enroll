@@ -522,7 +522,7 @@ module FinancialAssistance
     # Applicant is eligible for limited CSR if attested for AI/AN status if csr is not 100,
     # as csr 100 is better than csr limited
     def is_csr_limited?
-      (is_ia_eligible? && csr_percent_as_integer == -1) || (indian_tribe_member && csr_percent_as_integer != 100)
+      (is_ia_eligible? && csr_percent_as_integer == -1) || (!is_medicaid_chip_eligible? && indian_tribe_member && csr_percent_as_integer != 100)
     end
 
     def non_ia_eligible?

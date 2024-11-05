@@ -420,6 +420,26 @@ RSpec.describe ::FinancialAssistance::Applicant, type: :model, dbclean: :after_e
         expect(applicant.reload.is_csr_limited?).to be_truthy
       end
     end
+
+    context 'medicaid chip and indian_tribe_member' do
+      before do
+        applicant.update_attributes!({ indian_tribe_member: true, is_medicaid_chip_eligible: true })
+      end
+
+      it 'should return true' do
+        expect(applicant.reload.is_csr_limited?).to be_falsey
+      end
+    end
+
+    context 'medicaid chip and not indian_tribe_member' do
+      before do
+        applicant.update_attributes!({ indian_tribe_member: false, is_medicaid_chip_eligible: true })
+      end
+
+      it 'should return true' do
+        expect(applicant.reload.is_csr_limited?).to be_falsey
+      end
+    end
   end
 
   context 'format_citizen' do
