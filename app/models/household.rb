@@ -70,6 +70,11 @@ class Household
 
     coverage_households.each { |ch| ch.save! if ch.changed? }
     self.save
+    Rails.logger.error { "Error adding household coverage member: #{family_member&.family&.hbx_assigned_id}" } if members_match_family_members?
+  end
+
+  def members_match_family_members?
+    coverage_households.map(&:coverage_household_members).flatten.map(&:family_member_id).count == family.active_family_members.map(&:id).count
   end
 
   def build_household_coverage_member(family_member)

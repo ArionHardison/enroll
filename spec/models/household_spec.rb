@@ -32,6 +32,33 @@ describe Household, "given a coverage household with a dependent", :dbclean => :
     end
   end
 
+  describe "#members_match_family_members?" do
+    context "with matching family members" do
+      let(:new_family_member) {FactoryBot.create(:family_member, family: family, person: person)}
+
+      before do
+        family.active_household.add_household_coverage_member(new_family_member)
+      end
+
+      it 'returns true' do
+        expect(family.active_household.members_match_family_members?).to eq true
+      end
+    end
+
+    context "without matching family members" do
+      let(:new_family_member) {FactoryBot.create(:family_member, family: family, person: person)}
+
+      before do
+        new_family_member.save
+      end
+
+      it 'returns false' do
+        family.reload
+        expect(family.active_household.members_match_family_members?).to eq false
+      end
+    end
+  end
+
   context "ivl - new family member" do
     let(:new_person) { create(:person, :with_consumer_role) }
     let(:new_family_member) do
