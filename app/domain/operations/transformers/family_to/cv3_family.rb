@@ -238,7 +238,7 @@ module Operations
               start_on: th_group.start_on,
               end_on: th_group.end_on,
               source: th_group.source,
-              application_hbx_id: th_group.application_id,
+              application_hbx_id: th_group.application_hbx_id,
               tax_households: transform_tax_households(th_group.tax_households)
             }
           end

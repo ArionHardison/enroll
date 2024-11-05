@@ -29,4 +29,34 @@ RSpec.describe TaxHouseholdGroup, type: :model do
       end
     end
   end
+
+  describe '#application' do
+    let(:application) { FactoryBot.create(:financial_assistance_application, family_id: family.id) }
+
+    context 'with valid application_hbx_id' do
+      before do
+        current_tax_household_group.set(application_hbx_id: application.hbx_id)
+      end
+
+      it 'returns expected application' do
+        expect(current_tax_household_group.application).to eq(application)
+      end
+    end
+
+    context 'without an application for the applcation_hbx_id' do
+      before do
+        current_tax_household_group.set(application_hbx_id: '12345')
+      end
+
+      it 'returns nil' do
+        expect(current_tax_household_group.application).to be_nil
+      end
+    end
+
+    context 'without an applcation_hbx_id' do
+      it 'returns nil' do
+        expect(current_tax_household_group.application).to be_nil
+      end
+    end
+  end
 end

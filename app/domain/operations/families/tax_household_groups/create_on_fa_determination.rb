@@ -53,7 +53,7 @@ module Operations
 
         def fetch_tax_hh_group_params(application)
           { source: 'Faa',
-            application_id: application.hbx_id,
+            application_hbx_id: application.hbx_id,
             start_on: application.eligibility_determinations.first.effective_starting_on,
             end_on: nil,
             assistance_year: application.assistance_year }

@@ -64,7 +64,7 @@ RSpec.describe ::Operations::Eligibilities::BuildGrant, type: :model, dbclean: :
   let(:tax_household_group_params) do
     {
       source: 'Faa',
-      application_id: '1234567',
+      application_hbx_id: '1234567',
       start_on: TimeKeeper.date_of_record.next_month.beginning_of_month,
       end_on: nil,
       assistance_year: TimeKeeper.date_of_record.year,

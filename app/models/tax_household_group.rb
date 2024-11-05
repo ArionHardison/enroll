@@ -10,7 +10,16 @@ class TaxHouseholdGroup
   embedded_in :family
 
   field :source, type: String
+
+  # @!attribute [rw] application_id
+  #   @deprecated This field is deprecated. Initially, this field was added to store the application's BSON ID. Instead, we are now persisting the application's HBX ID using {#application_hbx_id}.
+  #   @return [BSON::ObjectId] the BSON ID of the application
   field :application_id, type: BSON::ObjectId
+
+  # @!attribute [rw] application_hbx_id
+  #   @return [String] the HBX ID of the application
+  field :application_hbx_id, type: String
+
   field :start_on, type: Date
   field :end_on, type: Date
   field :assistance_year, type: Integer
@@ -34,7 +43,6 @@ class TaxHouseholdGroup
   index({ assistance_year:  1 })
   index({ :"tax_households._id" => 1 })
 
-
   # Scopes
   scope :by_year,   ->(year) { where(assistance_year: year) }
   scope :active,    ->{ where(end_on: nil) }
@@ -43,6 +51,13 @@ class TaxHouseholdGroup
 
   def latest_active_tax_household_with_year(year)
     tax_households.tax_household_with_year(year).active_tax_household.order_by(:created_at.desc).first
+  end
+
+  # @return [FinancialAssistance::Application, nil] the application associated with the given HBX ID, or nil if not found
+  def application
+    return if application_hbx_id.blank?
+
+    ::FinancialAssistance::Application.by_hbx_id(application_hbx_id).first
   end
 
   private

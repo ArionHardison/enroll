@@ -93,7 +93,7 @@ module Operations
       def tax_household_group_params(application_entity)
         {
           source: 'Faa',
-          application_id: application_entity.hbx_id,
+          application_hbx_id: application_entity.hbx_id,
           start_on: application_entity.tax_households.first.effective_on,
           end_on: nil,
           assistance_year: application_entity.assistance_year,
