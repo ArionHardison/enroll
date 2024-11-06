@@ -88,7 +88,11 @@
   color: var(--grey-000) !important;
   background-color: var(--info-color) !important;
 
-  a {
+  a, button {
     color: var(--grey-000) !important;
+  }
+
+  ul.dropdown-menu.show a {
+    color: var(--grey-130) !important;
   }
 }
