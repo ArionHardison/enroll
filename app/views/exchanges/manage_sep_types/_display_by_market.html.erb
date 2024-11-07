@@ -1,7 +1,8 @@
 <% is_commonality_threshold_enabled = EnrollRegistry.feature_enabled?(:qle_commonality_threshold) %>
 <% qles = @sortable.by_market_kind(market_kind).active_by_state %> <%# TODO: possibly move this into the controller when we uplift this page %>
-<% common_number = qles.common.length %>
-<% threshold_index = common_number - 1 %>
+<% common_qles = qles.common %>
+<% rare_qles = qles.rare %>
+<% common_number = common_qles.length %>
 <% if @bs4 %>
   <div id="<%= market_kind %>" class="<%= display %>" data-controller="sep-types-list" data-target="sep-types-list.marketTab">
     <h2><%= l10n("exchange.manage_sep_types.titles")%></h2>
@@ -18,17 +19,22 @@
       </section>
     <% end %>
 
-    <div data-target="sep-types-list.qleList">
-      <% qles.each_with_index do |sort, i| %>
-        <div id='<%= "#{sort.reason}_#{sort.market_kind}" %>' data-id="<%= sort.id %>" data-ordinal_position="<%= sort.ordinal_position %>" data-index="<%=i%>" class="card card-body mb-4">
-          <%= sort.title %>
+    <div data-target="sep-types-list.commonQleList">
+      <% common_qles.each do |qle| %>
+        <div id='<%= "#{qle.reason}_#{qle.market_kind}" %>' data-id="<%= qle.id %>" class="card mb-4">
+          <%= qle.title %>
         </div>
-        <% if is_commonality_threshold_enabled && i == threshold_index %>
-          <section id="threshold-marker" class=<%= 'hidden' if i == qles.length - 1 %>>
-            <hr>
-            <h2><%= l10n('exchange.manage_sep_types.rare_header') %></h2>
-          </section>
-        <% end %>
+      <% end %>
+    </div>
+    <section data-target="sep-types-list.thresholdMarker" class=<%= 'hidden' if rare_qles.empty? %>>
+      <hr>
+      <h2><%= l10n('exchange.manage_sep_types.rare_header') %></h2>
+    </section>
+    <div data-target="sep-types-list.rareQleList">
+      <% rare_qles.each do |qle| %>
+        <div id='<%= "#{qle.reason}_#{qle.market_kind}" %>' data-id="<%= qle.id %>" class="card mb-4">
+          <%= qle.title %>
+        </div>
       <% end %>
     </div>
   </div>
@@ -45,18 +51,23 @@
       <% end %>
 
       <div class="row">
-        <div data-target="sep-types-list.qleList">
-          <% @sortable.where(market_kind: market_kind).active_by_state.each_with_index do |sort, i|%>
-              <div id='<%= "#{sort.reason}_#{sort.market_kind}" %>' data-id="<%= sort.id %>" data-ordinal_position="<%= sort.ordinal_position %>" data-index="<%=i%>" data-market_kind="<%=sort.market_kind%>" class="card card-body mb-4">
-                <%= sort.title%>
-              </div>
-              <% if is_commonality_threshold_enabled && i == threshold_index %>
-                <div id="threshold-marker" class=<%= 'hidden' if i == qles.length - 1 %>>
-                  <hr>
-                  <h2><%= l10n('exchange.manage_sep_types.rare_header') %></h2>
-                </div>
-              <% end %>
+        <div data-target="sep-types-list.commonQleList">
+          <% @sortable.where(market_kind: market_kind).active_by_state.each do |qle|%>
+            <div id='<%= "#{qle.reason}_#{qle.market_kind}" %>' data-id="<%= qle.id %>" class="card card-body mb-4">
+              <%= qle.title %>
+            </div>
           <%end%>
+        </div>
+        <section data-target="sep-types-list.thresholdMarker" class=<%= 'hidden' if rare_qles.empty? %>>
+          <hr>
+          <h2><%= l10n('exchange.manage_sep_types.rare_header') %></h2>
+        </section>
+        <div data-target="sep-types-list.rareQleList">
+          <% rare_qles.each do |qle| %>
+            <div id='<%= "#{qle.reason}_#{qle.market_kind}" %>' data-id="<%= qle.id %>" class="card card-body mb-4">
+              <%= qle.title %>
+            </div>
+          <% end %>
         </div>
       </div>
     </div>

@@ -27,6 +27,7 @@ RSpec.describe Operations::QualifyingLifeEventKind::UpdateList, type: :model, db
 
   context 'update ordinal_position' do
     before :each do
+      allow(EnrollRegistry).to receive(:feature_enabled?).with(:qle_commonality_threshold).and_return(true)
       @result = subject.call(params: sort_params)
       qlek1.reload
       qlek2.reload
@@ -52,6 +53,7 @@ RSpec.describe Operations::QualifyingLifeEventKind::UpdateList, type: :model, db
 
   context 'update commonality_threshold' do
     before :each do
+      allow(EnrollRegistry).to receive(:feature_enabled?).with(:qle_commonality_threshold).and_return(true)
       @result = subject.call(params: commonality_threshold_params)
       qlek1.reload
       qlek2.reload

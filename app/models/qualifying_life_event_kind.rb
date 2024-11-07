@@ -146,8 +146,8 @@ class QualifyingLifeEventKind
   scope :active,  ->{ where(is_active: true).by_date.where(:created_at.ne => nil).order(ordinal_position: :asc) }
   scope :by_market_kind, ->(market_kind){ where(market_kind: market_kind) }
   scope :non_draft, ->{ where(:aasm_state.nin => [:draft]) }
-  scope :common, -> { where.not(is_common: false) } # consider nil values as common to support existing data
-  scope :rare, -> { where(is_common: false) }
+  scope :common, -> { EnrollRegistry.feature_enabled?(:qle_commonality_threshold) ? where.not(is_common: false) : all } # consider nil values as common to support existing data
+  scope :rare, -> { EnrollRegistry.feature_enabled?(:qle_commonality_threshold) ? where(is_common: false) : none }
   scope :by_date, lambda { |date = TimeKeeper.date_of_record|
                     where(
                       :"$or" => [
