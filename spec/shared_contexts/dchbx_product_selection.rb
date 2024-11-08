@@ -928,3 +928,51 @@ RSpec.shared_context 'family has prior, current and renewal year coverage and in
                       rating_area_id: renewal_rating_area.id)
   end
 end
+
+RSpec.shared_context 'family has current and renewal year coverage and in open enrollment and purchased new coverage in current year via SEP', :shared_context => :metadata do
+  include_context 'prior, current and next year benefit coverage periods and products'
+
+  let(:consumer_role) { FactoryBot.create(:consumer_role) }
+  let(:family) do
+    FactoryBot.create(:family,
+                      :with_primary_family_member,
+                      person: consumer_role.person)
+  end
+  let(:qle) { FactoryBot.create(:qualifying_life_event_kind, market_kind: "individual") }
+  let(:sep) {  FactoryBot.create(:special_enrollment_period, effective_on: Date.new(current_coverage_year, 11, 1), family: family, coverage_renewal_flag: true, qualifying_life_event_kind_id: qle.id)}
+  let(:current_renewal_date) { TimeKeeper.date_of_record.beginning_of_year.year }
+  let(:renewal_calender_date) { TimeKeeper.date_of_record.beginning_of_year.next_year }
+  let!(:renewal_rating_area) do
+    ::BenefitMarkets::Locations::RatingArea.rating_area_for(consumer_role.person.rating_address, during: current_renewal_date) || FactoryBot.create_default(:benefit_markets_locations_rating_area, active_year: current_renewal_date.year)
+  end
+  let!(:current_rating_area) do
+    ::BenefitMarkets::Locations::RatingArea.rating_area_for(consumer_role.person.rating_address, during: renewal_calender_date) || FactoryBot.create_default(:benefit_markets_locations_rating_area, active_year: renewal_calender_date.year)
+  end
+
+  let!(:current_ivl_enrollment_2) do
+    FactoryBot.create(:hbx_enrollment,
+                      :individual_unassisted,
+                      :with_enrollment_members,
+                      enrollment_members: family.family_members,
+                      household: family.active_household,
+                      consumer_role_id: consumer_role.id,
+                      effective_on: Date.new(current_coverage_year, 1, 1),
+                      family: family,
+                      product: current_product,
+                      aasm_state: 'coverage_selected')
+  end
+
+  let!(:renewal_ivl_enrollment) do
+    FactoryBot.create(:hbx_enrollment,
+                      :individual_unassisted,
+                      :with_enrollment_members,
+                      enrollment_members: family.family_members,
+                      household: family.active_household,
+                      consumer_role_id: consumer_role.id,
+                      effective_on: Date.new(renewal_coverage_year, 1, 1),
+                      family: family,
+                      product: renewal_product,
+                      rating_area_id: renewal_rating_area.id,
+                      aasm_state: 'auto_renewing')
+  end
+end

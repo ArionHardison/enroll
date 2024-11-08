@@ -105,10 +105,11 @@ module Operations
         process_renewal_enrollment(enrollment, renewal_enrollment)
       end
 
-      def process_renewal_enrollment(enrollment, renewal_enrollment)
-        is_product_matched = product_matched?(enrollment, renewal_enrollment)
-        transition_args = is_product_matched ? { "reason" => Enrollments::TerminationReasons::SUPERSEDED_SILENT } : {}
-
+      # TODO: revisit this commented logic with different CRM ticket.
+      def process_renewal_enrollment(_enrollment, renewal_enrollment)
+        # is_product_matched = product_matched?(enrollment, renewal_enrollment)
+        # transition_args = is_product_matched ? { "reason" => Enrollments::TerminationReasons::SUPERSEDED_SILENT } : {}
+        transition_args = {}
         if EnrollRegistry.feature_enabled?(:cancel_superseded_terminated_enrollments)
           cancel_coverage_for_superseded_enrollment(renewal_enrollment, transition_args)
         elsif renewal_enrollment.may_cancel_coverage?
