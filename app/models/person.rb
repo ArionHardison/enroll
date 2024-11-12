@@ -894,15 +894,18 @@ class Person
 
   class << self
 
-    def build_full_name_field_pipeline
+    def full_name_field_pipeline
       {:$trim =>
         {:input =>
           {:$concat =>
-            [{:$cond => {:if => { :$ne => ["$person.name_pfx", nil]}, :then => { :$concat => ["$person.name_pfx", " "]}, :else => ""}},
-             {:$cond => { :if => { :$ne => ["$person.first_name", nil]}, :then => { :$concat => ["$person.first_name", " "]}, :else => ""}},
-             {:$cond => { :if => { :$ne => ["$person.middle_name", nil]}, :then => { :$concat => ["$person.middle_name", " "]}, :else => ""}},
-             {:$cond => { :if => { :$ne => ["$person.last_name", nil]}, :then => { :$concat => ["$person.last_name", " "]}, :else => ""}},
-             {:$cond => { :if => { :$ne => ["$person.name_sfx", nil]}, :then => { :$concat => ["$person.name_sfx", " "]}, :else => ""}}]}}}
+            ["$first_name", " ", "$last_name"]}}}
+    end
+
+    def sort_by_full_name_pipeline(sort_direction)
+      [
+        {:$addFields => { :full_name => full_name_field_pipeline }},
+        {:$sort => { :full_name => sort_direction }}
+      ]
     end
 
     def default_search_order

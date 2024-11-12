@@ -1,7 +1,10 @@
 module Queries
   class IdentityVerificationDatatableQuery
+    include Sorter
 
     attr_reader :search_string, :custom_attributes
+
+    AGGREGATABLE_COLUMNS = {"name" => :sort_by_full_name_pipeline}.freeze
 
     def datatable_search(string)
       @search_string = string
@@ -20,7 +23,6 @@ module Queries
       family = EnrollRegistry.feature_enabled?(:show_people_with_no_evidence) ? Person.for_admin_approval : Person.for_admin_approval_with_documents
       person = Person
       #add other scopes here
-      family = family.order_by(@order_by) if @order_by.present?
       return family if @search_string.blank? || @search_string.length < 2
       person_id = Person.search(@search_string).pluck(:_id)
       #Caution Mongo optimization on chained "$in" statements with same field
@@ -28,12 +30,20 @@ module Queries
       family.and('_id' => {"$in" => person_id})
     end
 
+    def build_query
+      limited_scope = build_scope
+      limited_scope = sort_query(limited_scope, @order_by) if @order_by
+      paginate(limited_scope)
+    end
+
     def skip(num)
-      build_scope.skip(num)
+      @skip = num
+      self
     end
 
     def limit(num)
-      build_scope.limit(num)
+      @limit = num
+      self
     end
 
     def order_by(var)
@@ -41,8 +51,20 @@ module Queries
       self
     end
 
+    def each(&block)
+      return to_enum(:each) unless block
+
+      build_query.each(&block)
+    end
+
+    def each_with_index(&block)
+      return to_enum(:each_with_index) unless block
+
+      build_query.each_with_index(&block)
+    end
+
     def klass
-      Family
+      Person
     end
 
     def size
