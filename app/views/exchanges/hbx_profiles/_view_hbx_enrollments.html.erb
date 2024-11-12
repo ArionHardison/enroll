@@ -17,8 +17,7 @@
               </thead>
 
               <% @enrollments.each_with_index do |enrollment, index| %>
-                <% reinstate_failure_reason = reinstatement_failure_message(enrollment)%>
-                  <tr data-cant-reinstate="<%= !reinstate_failure_reason.blank? %>">
+                  <tr class="reinstate-enrollment-row" data-reinstate-failure="<%= reinstatement_failure_message(enrollment) %>">
                     <td>
                       <div class="d-flex">
                         <label class="weight-n">
@@ -34,7 +33,6 @@
                     <td id="reinstate"><%= enrollment.fetch_term_or_expiration_date.next_day %></td>
                     <td><input type="checkbox" name="edi_required" value="checked" checked aria-labelledby="transmit_header" /></td>
                     <td id="hbx_id"><%= enrollment.hbx_id %></td>
-                    <td class="cant_reinstate_reason hidden"><%= reinstate_failure_reason %></td>
                   </tr>
               <%end%>
             </table>
@@ -89,12 +87,12 @@
   </div>
   <script type="text/javascript">
     var ReinstateModal = function () {
-      var failure = document.querySelector('tr[data-cant-reinstate] input[type=radio]:checked');
+      var row = document.querySelector('.reinstate-enrollment-row input[type=radio]:checked').closest(".reinstate-enrollment-row");
+      var failure = row.getAttribute('data-reinstate-failure');
       if (failure) {
-        var failureReason = failure.closest("tr").querySelector(".cant_reinstate_reason").textContent;
         $('.modal-header .icon').removeClass('info-icon').addClass('warning-icon');
         $('b.warning-text').removeClass('hidden');
-        $('#unableToReinstate').text(failureReason);
+        $('#unableToReinstate').text(failure);
         $('#show_reinstate').hide();
         $(".btn-confirmation").hide();
       } else {
