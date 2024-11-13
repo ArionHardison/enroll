@@ -70,7 +70,7 @@ RSpec.describe ::FinancialAssistance::Operations::Applications::Rrv::Ifsv::AddRr
       end
 
       it "should record request results" do
-        expect(@applicant.income_evidence.request_results.first.action).to eq "Hub Response"
+        expect(@applicant.income_evidence.request_results.first.action).to eq "RRV Response"
       end
     end
 
@@ -106,7 +106,29 @@ RSpec.describe ::FinancialAssistance::Operations::Applications::Rrv::Ifsv::AddRr
       end
 
       it "should record request results" do
-        expect(@applicant.income_evidence.request_results.first.action).to eq "Hub Response"
+        expect(@applicant.income_evidence.request_results.first.action).to eq "RRV Response"
+      end
+    end
+
+    context 'Avoid duplicate evidence update' do
+      before do
+        @applicant = application.applicants.first
+        @applicant.build_income_evidence(key: :income, title: "Income")
+        @applicant.save!
+        @applicant.income_evidence.request_results.create!(action: "RRV Response", created_at: 1.days.ago)
+        @result = subject.call(payload: response_payload_2)
+
+        @application = ::FinancialAssistance::Application.by_hbx_id(response_payload_2[:hbx_id]).first.reload
+        @app_entity = ::AcaEntities::MagiMedicaid::Operations::InitializeApplication.new.call(response_payload_2).success
+        @applicant.reload
+      end
+
+      it 'should return success' do
+        expect(@result).to be_success
+      end
+
+      it "should not record request results" do
+        expect(@applicant.income_evidence.request_results.count).to eq 1
       end
     end
   end

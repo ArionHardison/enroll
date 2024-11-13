@@ -60,6 +60,8 @@ module FinancialAssistance
             def update_applicant_evidence(applicant, status, response_applicant_entity)
               response_income_evidence = response_applicant_entity.income_evidence
               income_evidence = applicant.income_evidence
+              # below is a quick fix to avoid duplicate request results, rrv process needs refactoring
+              return if income_evidence.request_results.detect{|evidence| evidence.action == "RRV Response" && evidence.created_at.to_date >= Date.today - 1}.present?
 
               case status
               when "verified"
@@ -69,7 +71,7 @@ module FinancialAssistance
               end
 
               response_income_evidence.request_results&.each do |request_result|
-                income_evidence.request_results << Eligibilities::RequestResult.new(request_result.to_h.merge(action: "Hub Response"))
+                income_evidence.request_results << Eligibilities::RequestResult.new(request_result.to_h.merge(action: "RRV Response"))
               end
               applicant.save!
             end
