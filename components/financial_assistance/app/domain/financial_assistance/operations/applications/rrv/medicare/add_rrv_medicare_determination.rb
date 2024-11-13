@@ -37,23 +37,29 @@ module FinancialAssistance
             end
 
             def update_applicant(response_app_entity, application, applicant_identifier)
+              enrollments = HbxEnrollment.where(:aasm_state.in => HbxEnrollment::ENROLLED_STATUSES, family_id: application.family_id)
+
               response_applicant = response_app_entity.applicants.detect {|applicant| applicant.person_hbx_id == applicant_identifier}
               applicant = application.applicants.where(person_hbx_id: applicant_identifier).first
 
               return Failure("applicant not found with #{applicant_identifier} for rrv Medicare") unless applicant
               return Failure("applicant not found in response with #{applicant_identifier} for rrv Medicare") unless response_applicant
 
-              update_applicant_verifications(applicant, response_applicant)
+              update_applicant_verifications(applicant, response_applicant, enrollments)
               Success('Successfully updated Applicant with evidences and verifications')
             end
 
-            def update_applicant_verifications(applicant, response_applicant_entity)
+            def update_applicant_verifications(applicant, response_applicant_entity, enrollments)
               response_non_esi_evidence = response_applicant_entity.non_esi_evidence
               applicant_non_esi_evidence = applicant.non_esi_evidence
 
               if applicant_non_esi_evidence.present?
                 if response_non_esi_evidence.aasm_state == 'outstanding'
-                  applicant.set_evidence_outstanding(applicant_non_esi_evidence)
+                  if applicant_non_esi_evidence.enrolled_in_any_aptc_csr_enrollments?(enrollments)
+                    applicant.set_evidence_outstanding(applicant_non_esi_evidence)
+                  else
+                    applicant.set_evidence_to_negative_response(applicant_non_esi_evidence)
+                  end
                 else
                   applicant.set_evidence_attested(applicant_non_esi_evidence)
                 end
