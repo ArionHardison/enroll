@@ -727,4 +727,15 @@ RSpec.describe HbxEnrollment, type: :model do
       end
     end
   end
+
+  context "#tax_household_group" do
+    it "should return tax household group if tax household enrollments exist" do
+      expect(hbx_enrollment.tax_household_group).to be_present
+    end
+
+    it "should not return tax household group if no tax household enrollments" do
+      TaxHouseholdEnrollment.all.set(enrollment_id: nil)
+      expect(hbx_enrollment.tax_household_group).to eq nil
+    end
+  end
 end

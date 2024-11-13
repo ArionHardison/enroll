@@ -23,10 +23,10 @@ class TaxHouseholdMemberEnrollmentMember
   end
 
   def hbx_enrollment_member
-    tax_household_enrollment.tax_household.tax_household_members.find(hbx_enrollment_member_id)
+    tax_household_enrollment.enrollment.hbx_enrollment_members.find(hbx_enrollment_member_id)
   end
 
   def tax_household_member
-    tax_household_enrollment.enrollment.hbx_enrollment_members.find(tax_household_member_id)
+    tax_household_enrollment.tax_household.tax_household_members.find(tax_household_member_id)
   end
 end

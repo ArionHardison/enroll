@@ -110,5 +110,11 @@ RSpec.describe TaxHouseholdEnrollment, type: :model do
         expect(@new_thhe.tax_household_members_enrollment_members.first.family_member_id).to be thhm_enrollment_members.first.family_member_id
       end
     end
+
+    context "#tax_household_enrollment_member_names" do
+      it 'should fetch enrollment members full names' do
+        expect(thhe.tax_household_enrollment_member_names.split(", ")).to match_array(family.dependents.map(&:full_name))
+      end
+    end
   end
 end

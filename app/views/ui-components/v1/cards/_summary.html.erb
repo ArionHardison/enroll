@@ -26,7 +26,7 @@
       <% end %>
 
       <% if display_enr_summary_is_enabled(@hbx_enrollment) %>
-        <h2 data-cuke="enrollment_detail"><%= l10n('enrollment.details.header') %></h2>
+        <h1 data-cuke="enrollment_detail"><%= l10n('enrollment.details.header') %></h1>
         <dl class="parent">
           <dt><%= l10n('enrollment.effective_on') %></dt>
           <dd><%= @hbx_enrollment&.effective_on %></dd>
@@ -36,6 +36,11 @@
 
           <dt><%= l10n('product_hios_id') %></dt>
           <dd><%= @hbx_enrollment&.product&.hios_id || l10n('not_available') %></dd>
+
+          <% if @hbx_enrollment&.is_health_enrollment? %>
+            <dt><%= l10n('enrollment.health_plan.ehb_premium') %></dt>
+            <dd><%= @hbx_enrollment&.total_ehb_premium %></dd>
+          <% end %>
 
           <dt><%= l10n('rating_area.exchange_provided_code') %></dt>
           <dd><%= @hbx_enrollment&.rating_area&.exchange_provided_code || l10n('not_available') %></dd>
@@ -49,7 +54,7 @@
           <% end %>
         </dl>
 
-        <h2 data-cuke="enrollment_member_detail"><%= l10n('enrollment.members.header') %></h2>
+        <h1 data-cuke="enrollment_member_detail"><%= l10n('enrollment.members.header') %></h1>
         <% @hbx_enrollment.hbx_enrollment_members.each do |member| %>
           <h3><%= member.full_name.titleize %></h3>
           <dl>
@@ -57,9 +62,37 @@
             <dd><%= member.coverage_start_on %></dd>
           </dl>
         <% end %>
-      <% end %>
 
-      <h2><%= l10n("enrollment_member.enrollment_services") %></h2>
+        <% if (@hbx_enrollment.applied_aptc_amount.present? && @hbx_enrollment.applied_aptc_amount.cents > 0) %>
+          <h1 data-cuke="enrollment_tax_household_details"><%= l10n('enrollment.tax_household.details') %></h1>
+          <h2 data-cuke="application_detail"><%= l10n('application.details') %></h2>
+          <% application = @hbx_enrollment.tax_household_group&.application %>
+          <dl>
+            <dt><%= l10n('application_id') %></dt>
+            <dd><%= application&.hbx_id || l10n('not_available') %></dd>
+            <dt><%= l10n('application.submitted_at') %></dt>
+            <dd><%= application&.submitted_at || l10n('not_available') %></dd>
+          </dl>
+
+          <h2 data-cuke="tax_household_enrollment_details"><%= l10n('tax_household_enrollment.details') %></h2>
+          <% @hbx_enrollment.tax_household_enrollments.each_with_index do |thh_enr, index| %>
+            <h3><%= "#{l10n('tax_household_enrollment')} #{index + 1}" %></h3>
+            <dl>
+              <dt><%= l10n('tax_household_enrollment.members') %></dt>
+              <dd><%= thh_enr.tax_household_enrollment_member_names %></dd>
+              <dt><%= l10n('tax_household_enrollment.health_plan_benchmark_value') %></dt>
+              <dd><%= number_to_currency(thh_enr.household_health_benchmark_ehb_premium) || l10n('not_available') %></dd>
+              <dt><%= l10n('tax_household_enrollment.dental_plan_benchmark_value') %></dt>
+              <dd><%= number_to_currency(thh_enr.household_dental_benchmark_ehb_premium) || l10n('not_available') %></dd>
+              <dt><%= l10n('tax_household_enrollment.aptc_amount') %></dt>
+              <dd><%= number_to_currency(thh_enr.applied_aptc) || l10n('not_available') %></dd>
+            </dl>
+          <% end %>
+        <% end %>
+
+  <% end %>
+
+      <h1><%= l10n("enrollment_member.enrollment_services") %></h1>
       <table>
         <thead>
           <tr>

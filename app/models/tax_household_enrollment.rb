@@ -73,4 +73,10 @@ class TaxHouseholdEnrollment
       tax_household_members_enrollment_members: thhm_enrollment_members
     }
   end
+
+  def tax_household_enrollment_member_names
+    tax_household_members_enrollment_members.map do |thhm_enrollment_member|
+      thhm_enrollment_member.hbx_enrollment_member&.person&.full_name&.titleize
+    end.compact.join(", ")
+  end
 end

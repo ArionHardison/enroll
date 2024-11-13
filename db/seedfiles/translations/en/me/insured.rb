@@ -856,6 +856,7 @@ The I-94 number is also called the admissions number. It is an 11 character sequ
   :'en.enrollment_member.your_cost' => 'Your Cost At Participating Provider',
   :'en.enrollment_member.in_network' => '(In-Network)',
   :'en.enrollment.no_plans' => 'No Plans Found',
+  :'en.enrollment.health_plan.ehb_premium' => 'Health Plan EHB Premium',
   :'en.not_available' => 'NA',
   :'en.insured.rejected' => "%{ridp_type} successfully rejected.",
   :'en.insured.email_text' => "EMAIL *",
@@ -886,4 +887,14 @@ The I-94 number is also called the admissions number. It is an 11 character sequ
   :'en.insured.domestic_partner_value' => "Domestic partner's child",
   :'en.insured.parents_partner_key' => "parents_domestic_partner",
   :'en.insured.parents_partner_value' => "Parent's domestic partner",
+  :'en.enrollment.tax_household.details' => 'Enrollment Tax Household Details',
+  :'en.application.details' => "Application Details",
+  :'en.application_id' => "Application ID",
+  :'en.application.submitted_at' => 'Application Submitted At',
+  :'en.tax_household_enrollment' => 'Tax Household',
+  :'en.tax_household_enrollment.details' => 'Tax Household Details',
+  :'en.tax_household_enrollment.members' => 'Members',
+  :'en.tax_household_enrollment.health_plan_benchmark_value' => 'Health Plan Benchmark Value',
+  :'en.tax_household_enrollment.dental_plan_benchmark_value' => 'Dental Plan Benchmark Value',
+  :'en.tax_household_enrollment.aptc_amount' => 'APTC Amount'
 }.freeze

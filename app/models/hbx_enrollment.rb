@@ -2976,6 +2976,13 @@ class HbxEnrollment
     end
   end
 
+  def tax_household_group
+    thh_enrs = tax_household_enrollments
+    return if thh_enrs.blank?
+
+    thh_enrs.first&.tax_household&.tax_household_group
+  end
+
   # Checks to see if the new enrollment superseded the previous enrollment and is eligible for cancellation.
   #   - Checks if RR configuration is enabled
   #   - Checks if the enrollment is of kind individual market

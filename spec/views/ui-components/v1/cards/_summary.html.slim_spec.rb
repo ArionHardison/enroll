@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe "_summary.html.slim.rb", :type => :view, dbclean: :after_each  do
@@ -7,17 +9,77 @@ RSpec.describe "_summary.html.slim.rb", :type => :view, dbclean: :after_each  do
 
   let(:aws_env) { ENV['AWS_ENV'] || "qa" }
   let(:user) { FactoryBot.create(:user, person: person) }
+  let!(:county_zip) { BenefitMarkets::Locations::CountyZip.create!(county_name: "Hampden", state: 'ME', zip: "01001")}
   let(:person) {FactoryBot.create(:person)}
   let(:family) { FactoryBot.create(:family, :with_primary_family_member, person: person)}
   let(:active_household) {family.active_household}
   let(:hbx_enrollment_member){ FactoryBot.build(:hbx_enrollment_member, is_subscriber: true, applicant_id: family.family_members.first.id, coverage_start_on: TimeKeeper.date_of_record, eligibility_date: TimeKeeper.date_of_record) }
-  let(:rating_area) { FactoryBot.create(:benefit_markets_locations_rating_area) }
+  let!(:rating_area) do
+    ::BenefitMarkets::Locations::RatingArea.rating_area_for(address, during: effective_date) || FactoryBot.create_default(:benefit_markets_locations_rating_area, active_year: effective_date.year)
+  end
+  let!(:effective_date) { TimeKeeper.date_of_record.beginning_of_year }
+  let!(:address) { family.primary_person.rating_address }
   let(:kind) { 'individual' }
-  let(:hbx_enrollment) { FactoryBot.create(:hbx_enrollment,household: active_household, kind: kind, family: family, hbx_enrollment_members: [hbx_enrollment_member], rating_area_id: rating_area.id)}
+  let(:hbx_enrollment) do
+    FactoryBot.create(:hbx_enrollment,household: active_household, kind: kind, family: family, hbx_enrollment_members: [hbx_enrollment_member], rating_area_id: rating_area.id, product: product, applied_aptc_amount: Money.new(50_00))
+  end
   let(:member_enrollment) {BenefitSponsors::Enrollments::MemberEnrollment.new(member_id: hbx_enrollment_member.id, product_price: BigDecimal(100),sponsor_contribution: BigDecimal(100))}
   let(:group_enrollment) {BenefitSponsors::Enrollments::GroupEnrollment.new(product: mock_product, member_enrollments: [member_enrollment])}
   let(:member_group) {double(attrs.merge(group_enrollment: group_enrollment))}
   let(:mock_issuer_profile) { double("IssuerProfile", :dba => "a carrier name", :legal_name => "name") }
+  let!(:application_period) { effective_date.beginning_of_year..effective_date.end_of_year }
+  let!(:service_area) do
+    ::BenefitMarkets::Locations::ServiceArea.service_areas_for(address, during: effective_date).first || FactoryBot.create_default(:benefit_markets_locations_service_area, active_year: effective_date.year)
+  end
+
+  let!(:product) do
+    prod =
+      FactoryBot.create(
+        :benefit_markets_products_health_products_health_product,
+        :with_issuer_profile,
+        :silver,
+        benefit_market_kind: :aca_individual,
+        kind: :health,
+        application_period: application_period,
+        service_area: service_area,
+        csr_variant_id: '01'
+      )
+    prod.premium_tables = [premium_table]
+    prod.save
+    prod
+  end
+
+  let!(:premium_table)        { build(:benefit_markets_products_premium_table, effective_period: application_period, rating_area: rating_area) }
+  let!(:tax_household_group) do
+    family.tax_household_groups.create!(
+      assistance_year: TimeKeeper.date_of_record.year,
+      source: 'Faa',
+      start_on: TimeKeeper.date_of_record.beginning_of_year,
+      tax_households: [
+        FactoryBot.build(:tax_household, household: family.active_household)
+      ]
+    )
+  end
+
+  let!(:tax_household) do
+    tax_household_group.tax_households.first
+  end
+
+  let!(:thhm_enrollment_members) do
+    hbx_enrollment.hbx_enrollment_members.collect do |member|
+      FactoryBot.build(:tax_household_member_enrollment_member, hbx_enrollment_member_id: member.id, family_member_id: member.applicant_id, tax_household_member_id: "123")
+    end
+  end
+
+  let!(:thhe) do
+    tax_household_enrollment = FactoryBot.build(:tax_household_enrollment, enrollment_id: hbx_enrollment.id, tax_household_id: tax_household.id,
+                                                                           health_product_hios_id: hbx_enrollment.product.hios_id,
+                                                                           household_health_benchmark_ehb_premium: Money.new(100_000),
+                                                                           household_dental_benchmark_ehb_premium: Money.new(50_000),
+                                                                           dental_product_hios_id: nil, tax_household_members_enrollment_members: thhm_enrollment_members)
+    tax_household_enrollment.save
+    tax_household_enrollment
+  end
 
   let(:mock_product) do
     double(
@@ -304,6 +366,7 @@ RSpec.describe "_summary.html.slim.rb", :type => :view, dbclean: :after_each  do
       allow(EnrollRegistry).to receive(:feature_enabled?).with(:financial_assistance).and_return(true)
       allow(EnrollRegistry).to receive(:feature_enabled?).with(:allow_alphanumeric_npn).and_return(true)
       allow(view).to receive(:display_carrier_logo).and_return('logo/carrier/uhic.jpg')
+      assign :bs4, true
       sign_in broker_user
       render 'ui-components/v1/cards/summary', :qhp => mock_qhp_cost_share_variance
     end
@@ -327,12 +390,63 @@ RSpec.describe "_summary.html.slim.rb", :type => :view, dbclean: :after_each  do
     it 'should include full name of person' do
       expect(rendered).to have_content(hbx_enrollment_member.person.full_name.titleize)
     end
+
+    it 'should include enrollment tax household details text' do
+      expect(rendered).to have_content(l10n('enrollment.tax_household.details'))
+    end
+
+    it 'should include application details text' do
+      expect(rendered).to have_content(l10n('application.details'))
+    end
+
+    it 'should include application ID text' do
+      expect(rendered).to have_content(l10n('application_id'))
+    end
+
+    it 'should include application submitted_at text' do
+      expect(rendered).to have_content(l10n('application.submitted_at'))
+    end
+
+    it 'should include tax household members text' do
+      expect(rendered).to have_content(l10n('tax_household_enrollment.members'))
+    end
+
+    it 'should include tax household members names' do
+      expect(rendered).to have_content(thhe.tax_household_enrollment_member_names)
+    end
+
+    it 'should include tax household enrollment health benchmark text' do
+      expect(rendered).to have_content(l10n('tax_household_enrollment.health_plan_benchmark_value'))
+    end
+
+    it 'should include tax household enrollment health benchmark value' do
+      expect(rendered).to have_content(number_to_currency(thhe.household_health_benchmark_ehb_premium))
+    end
+
+    it 'should include tax household enrollment dental benchmark text' do
+      expect(rendered).to have_content(l10n('tax_household_enrollment.dental_plan_benchmark_value'))
+    end
+
+    it 'should include tax household enrollment health benchmark value' do
+      expect(rendered).to have_content(number_to_currency(thhe.household_dental_benchmark_ehb_premium))
+    end
+
+    it 'should include tax household enrollment aptc amount text' do
+      expect(rendered).to have_content(l10n('tax_household_enrollment.aptc_amount'))
+    end
   end
 
   context 'for display of enrollment additional summary with broker and feature flag is disabled' do
     let(:broker_user) { FactoryBot.create(:user, person: broker_person) }
     let(:broker_person) {FactoryBot.create(:person, :with_broker_role)}
     before do
+      allow(EnrollRegistry).to receive(:feature_enabled?).and_return(false)
+      allow(EnrollRegistry).to receive(:feature_enabled?).with(:display_enr_summary).and_return(false)
+      allow(EnrollRegistry).to receive(:feature_enabled?).with(:crm_publish_primary_subscriber).and_return(true)
+      allow(EnrollRegistry).to receive(:feature_enabled?).with(:validate_quadrant).and_return(true)
+      allow(EnrollRegistry).to receive(:feature_enabled?).with(:display_county).and_return(false)
+      allow(EnrollRegistry).to receive(:feature_enabled?).with(:financial_assistance).and_return(true)
+      allow(EnrollRegistry).to receive(:feature_enabled?).with(:allow_alphanumeric_npn).and_return(true)
       allow(view).to receive(:display_carrier_logo).and_return('logo/carrier/uhic.jpg')
       sign_in broker_user
       render 'ui-components/v1/cards/summary', :qhp => mock_qhp_cost_share_variance
