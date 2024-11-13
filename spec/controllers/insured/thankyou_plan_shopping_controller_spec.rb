@@ -75,6 +75,10 @@ RSpec.describe Insured::PlanShoppingsController, :type => :controller, dbclean: 
         end
       end
 
+      context "when elected aptc is greater than the max credit" do
+        it_behaves_like "sets @pct correctly", 500, 100
+      end
+
       context "when elected aptc is 0" do
         it_behaves_like "sets @pct correctly", 0.0, 100
       end

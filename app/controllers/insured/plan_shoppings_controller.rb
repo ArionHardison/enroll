@@ -135,8 +135,7 @@ class Insured::PlanShoppingsController < ApplicationController
       is_ivl_osse_filter_eligible = EnrollRegistry.feature_enabled?(:individual_osse_plan_filter) && @enrollment.ivl_osse_eligible?
       @min_aptc = is_ivl_osse_filter_eligible ? EnrollRegistry[:aca_individual_assistance_benefits].setting(:minimum_applied_aptc_percentage_for_osse).item : 0
       @max_credit = @plan.total_aptc_amount.round(2)
-      pct = @elected_aptc > 0 ? (@elected_aptc / @max_credit * 100).round : 0
-      @pct = pct > 0 ? pct : 100
+      @pct = 100 # the elected aptc amount divided by max credit will either be greater than 100 or will be 100. This is the reason for defaulting to 100.
       @elected_aptc = @elected_aptc > @max_credit ? @max_credit : @elected_aptc
       @elected_aptc_url = set_elected_aptc_insured_plan_shopping_path({ id: @hbx_enrollment.try(:id), market_kind: @market_kind, coverage_kind: @coverage_kind, elected_aptc: @elected_aptc, plan: @plan&.id, enrollment: @enrollment&.id })
     end
