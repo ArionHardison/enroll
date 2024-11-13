@@ -102,6 +102,12 @@
         $('#show_reinstate').show();
         $(".btn-confirmation").show();
       }
+
+      var effectiveDate = row.querySelector('#reinstate').textContent;
+      var planName = row.querySelector('#name').textContent;
+      $('#effective-date').text(effectiveDate);
+      $('#reinstate-plan-name').text(planName);
+
       $('#reinstate_confirm').modal('show');
     }
 
