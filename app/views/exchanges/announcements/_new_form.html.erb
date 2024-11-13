@@ -43,7 +43,7 @@
         <% end %>
     </fieldset>
     <div class="my-3">
-      <%= f.label :content, l10n("admin.announcements.announcement_text'"), class: 'required' %>
+      <%= f.label :content, l10n("admin.announcements.announcement_text"), class: 'required' %>
       <%= f.text_area :content, {class: 'w-100', rows: "6", required: true, placeholder: l10n("hbx_profiles.send_message.write_here")} %>
     </div>
     <div class="mt-3 <%=pundit_class(HbxProfile, :modify_admin_tabs?)%>">

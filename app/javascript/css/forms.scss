@@ -444,7 +444,6 @@ input[type='date']:invalid::-webkit-datetime-edit {
 input::-webkit-datetime-edit-day-field:focus,
 input::-webkit-datetime-edit-month-field:focus,
 input::-webkit-datetime-edit-year-field:focus {
-    background-color: var(--primary-color-dark);
-    color: var(--gray-000);
+    background-color: var(--badge-current-bg);
     outline: none;
 }
