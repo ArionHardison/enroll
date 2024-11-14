@@ -13,3 +13,9 @@ Feature: Joint Filing Taxes
     And the user lands on the Job Incomes Page
     And the user navigates back to the tax info page
     Then the user will see that the is filing jointly question is true
+  
+  Scenario: Not Filing as Head of Household
+    Given the user clicks add Income and Coverage Information
+    And the user is on the tax info page
+    And the user selects they are not filing jointly
+    Then the application shows the primary is not filing taxes

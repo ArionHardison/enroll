@@ -41,6 +41,21 @@ And(/^the user selects they are filing jointly$/) do
   find("#btn-continue").click
 end
 
+And(/^the user selects they are not filing jointly$/) do
+  find("#is_required_to_file_taxes_yes").click
+  find("#is_joint_tax_filing_no").click
+  find("#is_filing_as_head_of_household_no").click
+  find("#is_claimed_as_tax_dependent_no").click
+  find("#btn-continue").click
+end
+
+Then(/^the application shows the primary is not filing taxes$/) do
+  application = FinancialAssistance::Application.first
+  applicant = application.applicants.first
+  expect(applicant.is_filing_as_head_of_household).to be_falsey
+end
+
+
 And(/^the user lands on the Job Incomes Page$/) do
   find(".incomes")
 end
