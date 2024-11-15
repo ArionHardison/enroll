@@ -36,11 +36,11 @@
           </tr>
           <tr>
             <th><label for="admin_bulk_notice_subject" class="weight-n required"><%= l10n('subject') %></label></th>
-            <td><%= f.text_field :subject, :size => "55", placeholder: l10n("subject"), include_blank: false, required: true %></td>
+            <td><%= f.text_field :subject, :size => "55", placeholder: l10n("subject"), include_blank: false, required: true, class: "w-100" %></td>
           </tr>
           <tr>
             <th><label for="admin_bulk_notice_body" class="weight-n required"><%= l10n('content') %></label></th>
-            <td><%= f.text_area :body, rows: 5, placeholder: l10n('hbx_profiles.send_message.write_here'), required: true  %></td>
+            <td><%= f.text_area :body, rows: 5, placeholder: l10n('hbx_profiles.send_message.write_here'), required: true, class: "w-100"  %></td>
           </tr>
           <tr>
             <th><label for="file" class="weight-n"><%= l10n('hbx_profiles.send_message.document') %></label></th>
@@ -52,7 +52,7 @@
                   <%= f.hidden_field "documents_attributes][#{i}][_destroy", value: 'false' %>
                 </div>
               <% end %>
-              <%= file_field_tag "file", type: :file, accept: ::FileUploadValidator::VERIFICATION_DOC_TYPES.join(','), class: @bulk_notice.documents.empty? ? "doc-upload-file" : "doc-upload-file d-none" %>
+              <%= file_field_tag "file", type: :file, accept: ::FileUploadValidator::VERIFICATION_DOC_TYPES.join(','), class: "w-75 #{@bulk_notice.documents.empty? ? "doc-upload-file" : "doc-upload-file d-none"}" %>
             </td>
           </tr>
         </tbody>
