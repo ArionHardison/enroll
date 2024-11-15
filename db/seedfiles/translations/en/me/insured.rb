@@ -558,7 +558,7 @@ The I-94 number is also called the admissions number. It is an 11 character sequ
   :'en.insured.family_members.index.add_member_info_html' => "<span class='bold'>Here's your chance to add family members to your plan.</span><br>Add family members by clicking the 'Add Member' button. If you don't need to add more members, or when you are done adding members, click continue.",
   :'en.insured.family_members.duplicate_error_message' => "Cannot %{action} the duplicate members as they are present on enrollments/tax households. Please call customer service at %{contact_center_phone_number}.",
   :'en.month' => "Month",
-  :'en.termination_date' => "Termination date",
+  :'en.termination_date' => "Termination Date",
   :'en.insured.group_selection.coverage_household_ineligible_coverage' => "Employer sponsored coverage is not available",
   :'en.insured.group_selection.medicaid_eligible_warning' => "Assessed eligible for %{medicaid_or_chip_program_short_name}",
   :'en.insured.group_selection.is_tobacco_user' => "Is this person a Tobacco user?",
