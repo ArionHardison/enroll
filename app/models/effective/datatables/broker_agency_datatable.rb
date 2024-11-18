@@ -23,24 +23,16 @@ module Effective
 
         table_column :entity_kind, :label => l10n('entity_kind'), :proc => proc { |row| row.entity_kind.to_s.titleize }, :sortable => false, :filter => false, :width => '10%'
         table_column :market_kind, :label => l10n('market'), :proc => proc { |row| row.broker_agency_profile.market_kind.to_s.titleize }, :sortable => false, :filter => false, :width => '10%'
+
+        default_order :legal_name, :asc
       end
 
       def collection
-        return @broker_agency_profiles_collection if defined? @broker_agency_profiles_collection
-
-       # Query From New Model
-        @broker_agency_profiles_collection = BenefitSponsors::Organizations::Organization.broker_agency_profiles.order_by([:legal_name])
-
-       # Query from Old Model
-       #@broker_agency_profiles_collection = Organization.exists(broker_agency_profile: true).order_by([:legal_name])
+        @collection ||= Queries::BrokerAgencyDatatableQuery.new(attributes)
       end
 
       def global_search?
         true
-      end
-
-      def search_column(collection, table_column, search_term, sql_column)
-        super
       end
 
       def nested_filter_definition
