@@ -21,15 +21,36 @@ export default class extends Controller {
     initializeReasons(){
       var qlek_reasons = this.metadata.qlek_reasons
       var reason_options = document.querySelector("#reasonContainer select")
+
+      function getOptionValues(options) {
+        return Array.from(options).map(option => option.value);
+      }
+
+      function getOptionLabels(options) {
+        return Array.from(options).map(option => option.label.toLocaleLowerCase());
+      }
+
+      function formatReason(reason) {
+        return reason.toLocaleLowerCase().split('_').join(' ');
+      }
+
+      var reasonFromValue = getOptionValues(reason_options.options);
+      var reasonFromLabel = getOptionLabels(reason_options.options);
+
       for (var qlek_reason of qlek_reasons) {
-        if (Array.from(reason_options.options).map(option => option.value).includes(qlek_reason) == false){
-          reason_options.options[reason_options.options.length] = new Option(qlek_reason.toLocaleLowerCase().split('_').join(' '), qlek_reason)
+        var reasonMatchesWithTagValue = reasonFromValue.includes(qlek_reason);
+        var reasonMatchesWithTagLabel = reasonFromLabel.includes(qlek_reason.toLocaleLowerCase());
+        var reasonMatchesWithTagLabelFormatted = reasonFromLabel.includes(formatReason(qlek_reason));
+
+        if (!(reasonMatchesWithTagValue || reasonMatchesWithTagLabel || reasonMatchesWithTagLabelFormatted)) {
+          reason_options.options[reason_options.options.length] = new Option(formatReason(qlek_reason), qlek_reason);
         }
       }
-      reason_options.options[reason_options.options.length] = new Option("other", "other")
-      this.setSelectedReason()
-      if (this.metadata.reason != undefined){
-        this.checkSelectedReason()
+
+      reason_options.options[reason_options.options.length] = new Option("other", "other");
+      this.setSelectedReason();
+      if (this.metadata.reason != undefined) {
+        this.checkSelectedReason();
       }
     }
 
