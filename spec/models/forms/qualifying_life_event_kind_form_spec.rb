@@ -22,6 +22,38 @@ RSpec.describe Forms::QualifyingLifeEventKindForm, type: :model, dbclean: :after
     it 'should load qlek reasons on to the form object' do
       expect(@qlek_form.qlek_reasons).to eq QualifyingLifeEventKind.non_draft.map(&:reason).uniq
     end
+
+    context "when there are multilple records for the same reason" do
+      let(:persist_qle) do
+        qle = QualifyingLifeEventKind.find_or_create_by(
+          title: "termination of benefits"
+        ).tap do |qlek|
+          qlek.update_attributes(
+            tool_tip: "test",
+            action_kind: "test",
+            event_kind_label: "Coverage end date",
+            market_kind: "individual",
+            ordinal_position: 3,
+            reason: "termination_of_benefits",
+            edi_code: "test",
+            effective_on_kinds: ["test"],
+            pre_event_sep_in_days: 60,
+            post_event_sep_in_days: 60,
+            is_self_attested: true,
+            is_visible: true,
+            date_options_available: false
+          )
+        end
+        qle.update_attributes(aasm_state: :active, is_active: true)
+        qle
+      end
+
+      it 'should return only unique values' do
+        array = @qlek_form.qle_kind_reason_options
+        duplicates = find_duplicates(array)
+        expect(duplicates.present?).to be_falsey
+      end
+    end
   end
 
   context 'for for_edit' do
@@ -169,5 +201,11 @@ RSpec.describe Forms::QualifyingLifeEventKindForm, type: :model, dbclean: :after
     types_module_constants = Types.constants(false)
     Types.send(:remove_const, :QLEKREASONS) if types_module_constants.include?(:QLEKREASONS)
     load File.join(Rails.root, 'app/domain/types.rb')
+  end
+
+  def find_duplicates(array)
+    counts = Hash.new(0)
+    array.each { |element| counts[element] += 1 }
+    counts.select { |_key, value| value > 1 }.keys
   end
 end

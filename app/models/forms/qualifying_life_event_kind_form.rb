@@ -64,7 +64,7 @@ module Forms
     end
 
     def qle_kind_reason_options
-      (QualifyingLifeEventKind::REASON_KINDS + QualifyingLifeEventKind.non_draft.map(&:reason).uniq)
+      (QualifyingLifeEventKind::REASON_KINDS + QualifyingLifeEventKind.non_draft.map(&:reason)).uniq
     end
 
     class << self
