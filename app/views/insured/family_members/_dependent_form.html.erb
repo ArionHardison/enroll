@@ -102,6 +102,10 @@
             </div>
           </fieldset>
 
+           <% if current_user.does_not_have_any_staff_role? && !current_user.has_insured_role? %>
+             <%= render 'shared/age_off_excluded', f: f %>
+           <% end %>
+
           <div class="d-flex mb-md-4">
             <div class="">
               <%= f.label :relationship, l10n("relationship_to_primary_member"), class: "required weight-n" %>

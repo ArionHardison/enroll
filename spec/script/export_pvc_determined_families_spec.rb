@@ -23,6 +23,8 @@ describe 'export_rrv_families' do
     family
   end
 
+  let!(:county) { ::BenefitMarkets::Locations::CountyZip.create(zip: "01001", state: "ME", county_name: "Hampden") }
+
   let(:dependent) { FactoryBot.create(:person) }
   let(:primary) {  FactoryBot.create(:person, :with_consumer_role)}
   let(:primary_applicant) { family.primary_applicant }

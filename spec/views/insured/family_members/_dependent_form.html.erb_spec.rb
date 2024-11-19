@@ -10,6 +10,7 @@ describe "insured/family_members/_dependent_form.html.erb" do
   let(:family_member) { family.family_members.new }
   let(:dependent) { Forms::FamilyMember.new(family_id: family.id) }
   let(:individual_market_is_enabled) { true }
+  let(:bs4) { false }
 
   context "with consumer_role_id" do
     before :each do
@@ -20,10 +21,11 @@ describe "insured/family_members/_dependent_form.html.erb" do
       allow(person).to receive(:is_consumer_role_active?).and_return true
       assign :person, person
       assign :dependent, dependent
+      assign :bs4, bs4
       assign(:support_texts, {support_text_key: "support-text-description"})
       allow(view).to receive(:individual_market_is_enabled?).and_return(individual_market_is_enabled)
       allow(view).to receive(:policy_helper).and_return(double("Policy", updateable?: true))
-      render "insured/family_members/dependent_form", dependent: dependent, person: person
+      render "insured/family_members/dependent_form", dependent: dependent, person: person, bs4: bs4
     end
 
     it "should have dependent_list area" do
@@ -65,6 +67,24 @@ describe "insured/family_members/_dependent_form.html.erb" do
       it "should have show tribal_container" do
         expect(rendered).to_not have_selector('div#tribal_container')
         expect(rendered).to_not have_content('Are you a member of an American Indian or Alaska Native Tribe? *')
+      end
+    end
+
+    context "when bs4 is enabled" do
+      let(:bs4) { true }
+
+      context "when logged in user does not have any staff role and also no employee/consumer role" do
+        let(:user) { FactoryBot.create(:user) }
+
+        it "should have age_off exclusion field" do
+          expect(rendered).to have_content(l10n('ageoff_exclusion'))
+        end
+      end
+
+      context "when logged in has consumer role" do
+        it "should not have age_off exclusion field" do
+          expect(rendered).not_to have_content(l10n('ageoff_exclusion'))
+        end
       end
     end
 
