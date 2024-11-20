@@ -61,8 +61,6 @@ class BulkNoticeWorker
       body: bulk_notice.body,
       actions_id: "Bulk Notice",
       document: bulk_notice.documents.first,
-      model_id: bulk_notice.id.to_s,
-      model_klass: bulk_notice.class.to_s
     }
   end
 
