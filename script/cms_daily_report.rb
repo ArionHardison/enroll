@@ -821,14 +821,18 @@ puts "9. Consumers Eligible for QHP (gross). Total number of family members that
 #   end
 # end
 
-def process_ivl_families_with_qhp_assistance(families, offset_count)
+def process_ivl_families_with_qhp_assistance(families, offset_count, daily_stat=false)
+  members_with_qhp_assistance = []
   families.no_timeout.limit(10_000).offset(offset_count).inject([]) do |_dummy, family|
     primary = family.primary_person
     
     if EnrollRegistry.feature_enabled?(:temporary_configuration_enable_multi_tax_household_feature)
       # grab all tax households for any tax household groups starting in the next year
       thhs = family.tax_household_groups.where(:"start_on".gte => Date.new(next_year), :"start_on".lt => Date.new(next_year+1)).map(&:tax_households).flatten
-      # grab all instances of tax household members that are determined ia eligible
+      if daily_stat
+        thhs = thhs.select { |thh| thh.created_at >= @state_at && thh.created_at <= @end_at }
+      end
+        # grab all instances of tax household members that are determined ia eligible
       all_ia_eligible_determinations = thhs.flat_map(&:tax_household_members).select(&:is_ia_eligible)
       # remove duplicate members (those determined ia eligible in multiple determinations)
       thhm_aptc_members = all_ia_eligible_determinations.group_by(&:applicant_id).values.map(&:first)
@@ -842,10 +846,9 @@ def process_ivl_families_with_qhp_assistance(families, offset_count)
           aptc = tax_households&.sum { |thh| thh.max_aptc.to_f }
           medicaid_eligible = thhm_medicaid_members.any? { |th_member| th_member.applicant_id.to_s == aptc_thhm.applicant_id.to_s }
           if aptc_thhm&.person&.is_applying_coverage && !medicaid_eligible
-            @total_members_with_qhp_assistance << aptc_thhm&.person&.hbx_id
+            members_with_qhp_assistance << aptc_thhm&.person&.hbx_id
           end
         end
-        @total_member_counter_qhp_assistance += thhm_aptc_members.count
       end
     else
       thh = family.latest_household.tax_households.where(effective_ending_on: nil, :"effective_starting_on".gte => Date.new(next_year)).first
@@ -853,15 +856,15 @@ def process_ivl_families_with_qhp_assistance(families, offset_count)
       if thh.present? && thhm_aptc_members.present?
         thhm_aptc_members.each do |aptc_thhm|
           if aptc_thhm&.person&.is_applying_coverage
-            @total_members_with_qhp_assistance << aptc_thhm&.person&.hbx_id
+            members_with_qhp_assistance << aptc_thhm&.person&.hbx_id
           end
         end
-        @total_member_counter_qhp_assistance += thhm_aptc_members.count
       end
     end
   rescue StandardError => e
     puts e.message unless Rails.env.test?
   end
+  members_with_qhp_assistance
 end
 
 if EnrollRegistry.feature_enabled?(:temporary_configuration_enable_multi_tax_household_feature)
@@ -874,8 +877,7 @@ total_count = families.count
 families_per_iteration = 10_000.0
 number_of_iterations = (total_count / families_per_iteration).ceil
 counter = 0
-@total_member_counter_qhp_assistance = 0
-@total_members_with_qhp_assistance = []
+total_members_with_qhp_assistance = []
 
 # Remove export of files containing PII
 # while counter < number_of_iterations
@@ -887,11 +889,34 @@ counter = 0
 
 while counter < number_of_iterations
   offset_count = families_per_iteration * counter
-  process_ivl_families_with_qhp_assistance(families, offset_count)
+  members_with_qhp_assistance = process_ivl_families_with_qhp_assistance(families, offset_count)
+  total_members_with_qhp_assistance += members_with_qhp_assistance
   counter += 1
 end
 
-puts "9.1. Consumers Eligible for QHP, with Financial Assistance (gross). Total number of family members that are found eligible for APTC(insurance_assistance) are: #{@total_members_with_qhp_assistance.uniq.count}"
+puts "9.1. Consumers Eligible for QHP, with Financial Assistance (gross). Total number of family members that are found eligible for APTC(insurance_assistance) are: #{total_members_with_qhp_assistance.uniq.count}"
+
+if EnrollRegistry.feature_enabled?(:temporary_configuration_enable_multi_tax_household_feature)
+  families = Family.where(:"tax_household_groups.start_on".gte => Date.new(next_year), :"tax_household_groups.start_on".lt => Date.new(next_year+1),
+                          :"tax_household_groups.tax_households.created_at".gte => @state_at, :"tax_household_groups.tax_households.created_at".lte => @end_at)
+else
+  families = Family.where(:"households.tax_households" => { "$elemMatch" => { :"effective_ending_on" => nil, :"effective_starting_on".gte => Date.new(next_year) } })
+end
+
+total_count = families.count
+families_per_iteration = 10_000.0
+number_of_iterations = (total_count / families_per_iteration).ceil
+counter = 0
+daily_members_with_qhp_assistance = []
+
+while counter < number_of_iterations
+  offset_count = families_per_iteration * counter
+  members_with_qhp_assistance = process_ivl_families_with_qhp_assistance(families, offset_count, daily_stat=true)
+  daily_members_with_qhp_assistance += members_with_qhp_assistance
+  counter += 1
+end
+
+puts "9.2 Consumers Eligible for QHP, with Financial Assistance for applications submitted yesterday #{daily_members_with_qhp_assistance.uniq.count}"
 
 CSV.open("#{Rails.root}/CMS_daily_report_summary.csv", "w", force_quotes: true) do |csv|
   data =[
@@ -910,7 +935,8 @@ CSV.open("#{Rails.root}/CMS_daily_report_summary.csv", "w", force_quotes: true) 
       ["","Consumers on Applications Submitted (gross)", @total_member_counter_for_coverage],
       ["","Consumers Determined Eligible for Medicaid/CHIP (gross)", @total_medicaid_chip_members.uniq.count],
       ["","Consumers Eligible for QHP (gross)", @total_members_with_qhp.uniq.count],
-      ["","Consumers Eligible for QHP, with Financial Assistance (gross)", @total_members_with_qhp_assistance.uniq.count]
+      ["","Consumers Eligible for QHP, with Financial Assistance (gross)", total_members_with_qhp_assistance.uniq.count],
+      ["","Number of Consumers Eligible for QHP, with Financial Assistance on a single day", daily_members_with_qhp_assistance.uniq.count]
   ]
   data.each do |da|
     csv << da
