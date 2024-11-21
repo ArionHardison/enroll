@@ -354,4 +354,8 @@ class IvlIapOtherIncomePage
   def self.taxable_scholorship_select_yearly
     'li[class="interaction-choice-control-income-frequency-kind-127 last interaction-choice-control-income-frequency-kind-7"]'
   end
+
+  def self.end_date_warning_text
+    '[data-cuke="end-date-warning-text"]'
+  end
 end

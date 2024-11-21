@@ -95,6 +95,7 @@ FINANCIAL_ASSISTANCE_TRANSLATIONS = {
   "en.faa.incomes.from_employer" => "Does this person have income from an employer (wages, tips, bonuses, etc.) in %{assistance_year}?",
   "en.faa.incomes.income_from_self" => "Does %{subject} have self-employment income?",
   "en.faa.incomes.from_self_employment" => "Does this person expect to receive self-employment income in %{assistance_year}?",
+  "en.faa.nav.other_income" => "Other Income",
   "en.faa.other_incomes.other_income_question" => "Does %{name} have income from other sources",
   "en.faa.other_incomes.description" => "Tell us about other income for %{name}, select “Continue to Next Step” when finished.",
   "en.faa.other_incomes.unemployment_question" => "Does %{name} receive unemployment compensation, or have they received it this year?",

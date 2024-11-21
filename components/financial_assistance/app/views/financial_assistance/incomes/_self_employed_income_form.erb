@@ -5,14 +5,9 @@
     <% dummy_income_id = "#{income_id}#{new_form ? 'dummy' : ''}" # needed to prevent Multiple Form Label accessibility error %>
     <%= hidden_field_tag :bs4, true %>
     <div class="my-4">
-      <div class="alert alert-info d-flex" role="alert">
-        <div class="pl-2 pt-2 pr-1">
-          <div class="info-icon icon" alt="info" aria-hidden="true">&nbsp;</div>
-        </div>
-        <div class="mt-1 pl-0 pr-2 pt-1">
-          <p class="subtext"><%= l10n('faa.note') %> <%= l10n('faa.incomes.income_note', subject: @applicant.first_name, income_kind: "self-employment income", end_date_field_label: l10n('end_date')) %></p>
-        </div>
-      </div>
+
+      <%= render partial: 'financial_assistance/shared/end_date_warning_alert', locals: { applicant: @applicant, kind: "note_self_employment_income_field" } %>
+
       <% onchange_date = FinancialAssistanceRegistry[:income_and_deduction_date_warning].enabled? ? (raw "validateDateWarnings('#{income_id}', true)") : "" %>
       <%= f.hidden_field :kind, value: 'net_self_employment' %>
       <div class="d-flex col-sm income-form-row p-0 mb-2">

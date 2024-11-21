@@ -6,7 +6,7 @@ module FinancialAssistance
 
     before_action :find_application_and_applicant
     before_action :set_cache_headers, only: [:index, :other]
-    before_action :enable_bs4_layout, only: [:other, :index] if EnrollRegistry.feature_enabled?(:bs4_consumer_flow)
+    before_action :enable_bs4_layout, only: [:other, :index]
     before_action :conditionally_enable_bs4_layout, only: [:create, :update] if EnrollRegistry.feature_enabled?(:bs4_consumer_flow)
 
     # This is a before_action that checks if the application is a renewal draft and if it is, it sets a flash message and redirects to the applications_path
@@ -140,7 +140,7 @@ module FinancialAssistance
     end
 
     def enable_bs4_layout
-      @bs4 = true
+      @bs4 = true if EnrollRegistry.feature_enabled?(:bs4_consumer_flow)
     end
 
     def resolve_layout

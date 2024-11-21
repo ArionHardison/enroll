@@ -10,7 +10,7 @@ end
 
 Then(/^the user will navigate to the Other Income page for the corresponding applicant$/) do
   sleep 2
-  expect(page).to have_content "Other Income for"
+  expect(page).to have_content l10n('faa.nav.other_income')
 end
 
 Given(/^the user answers no to having other income$/) do
@@ -41,12 +41,20 @@ Given(/^the user answers yes to having unemployment income$/) do
   find("#has_unemployment_income_true").click
 end
 
+Then(/the user should see the end date warning note above the form/) do
+  expect(page.has_css?(IvlIapOtherIncomePage.end_date_warning_text)).to eq true
+end
+
 Then(/^the unemployment income choices should show$/) do
   expect(page).to have_content "Add Another Unemployment Income"
 end
 
 Given(/^the user checks a other income checkbox$/) do
-  find(:css, "#other_income_kind[value='alimony_and_maintenance']").set(true)
+  if EnrollRegistry.feature_enabled?(:bs4_consumer_flow)
+    find(:css, "#other-income-checkbox-alimony_and_maintenance").click
+  else
+    find(:css, "#other_income_kind[value='alimony_and_maintenance']").set(true)
+  end
 end
 
 Given(/^the user checks capital gains checkbox$/) do

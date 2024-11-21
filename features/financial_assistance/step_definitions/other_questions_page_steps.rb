@@ -71,7 +71,7 @@ end
 
 Given(/^the user will navigate to the FAA Household Info page$/) do
   allow(HbxProfile).to receive(:current_hbx).and_return(double(:under_open_enrollment? => false))
-  visit financial_assistance.edit_application_path(application.id.to_s)
+  visit financial_assistance.edit_application_path(application.id.to_s, {bs4: EnrollRegistry.feature_enabled?(:bs4_consumer_flow)})
 end
 
 Given(/the No SSN Dropdown feature is disabled/) do

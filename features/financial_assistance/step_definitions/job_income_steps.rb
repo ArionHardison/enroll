@@ -85,13 +85,18 @@ end
 
 And(/^the user enters an end date$/) do
   fill_in IvlIapJobIncomeInformationPage.income_to, with: Date.today.strftime('%m/%d/%Y')
-  find(IvlIapJobIncomeInformationPage.calendar).click
+  find(IvlIapJobIncomeInformationPage.calendar).click unless EnrollRegistry.feature_enabled?(:bs4_consumer_flow)
 end
 
 Then(/^the user should see the end date warning message$/) do
   find("#date_warnings_list", wait: 5)
   expect(page).not_to have_selector(IvlIapJobIncomeInformationPage.start_date_warning)
   expect(page).to have_selector(IvlIapJobIncomeInformationPage.end_date_warning)
+end
+
+Then(/^the user should see the end date warning modal$/) do
+  find('#end_date_warning_modal')
+  expect(page.has_css?("#end_date_warning_modal")).to eq true
 end
 
 Then(/^the user should see the start date and end date warning messages$/) do

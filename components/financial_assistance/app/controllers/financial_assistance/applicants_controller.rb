@@ -7,7 +7,7 @@ module FinancialAssistance
     before_action :find, :find_application, :except => [:age_of_applicant] #except the ajax requests
     before_action :find_applicant, only: [:age_of_applicant]
     before_action :set_cache_headers, only: [:other_questions, :tax_info]
-    before_action :enable_bs4_layout, only: [:edit, :other_questions, :tax_info] if EnrollRegistry.feature_enabled?(:bs4_consumer_flow)
+    before_action :enable_bs4_layout, only: [:edit, :other_questions, :tax_info]
 
     # This is a before_action that checks if the application is a renewal draft and if it is, it sets a flash message and redirects to the applications_path
     # This before_action needs to be called after finding the application
@@ -307,7 +307,7 @@ module FinancialAssistance
     end
 
     def enable_bs4_layout
-      @bs4 = true
+      @bs4 = true if EnrollRegistry.feature_enabled?(:bs4_consumer_flow)
     end
   end
 end
