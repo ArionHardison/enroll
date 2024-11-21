@@ -7,30 +7,27 @@ class VerificationType
 
   embedded_in :person
 
-  LOCATION_RESIDENCY = EnrollRegistry[:enroll_app].setting(:state_residency).item
-
-  # @!macro [new] constant
-  #   @!attribute [r] $0
-  #   @return [Array<String>] an array of all verification types.
-
-  # List of all verification types
-  # @todo Remove LOCATION_RESIDENCY and add it conditionally when
-  # `EnrollRegistry.feature_enabled?(:location_residency_verification_type)` is true as
-  # it is only applicable in DC context.
-  ALL_VERIFICATION_TYPES = [
-    LOCATION_RESIDENCY,
-    "Social Security Number",
-    "American Indian Status",
-    "Citizenship",
-    "Immigration status",
-    'Alive Status'
-  ].freeze
-
+  SOCIAL_SECURITY_NUMBER = 'Social Security Number'.freeze
+  AMERICAN_INDIAN_STATUS = 'American Indian Status'.freeze
+  CITIZENSHIP = 'Citizenship'.freeze
+  IMMIGRATION_STATUS = "Immigration status".freeze
   ALIVE_STATUS = 'Alive Status'.freeze
 
-  ADMIN_CALL_HUB_VERIFICATION_TYPES = ALL_VERIFICATION_TYPES - ["Alive Status", "American Indian Status"].freeze
+  ALL_VERIFICATION_TYPES = [
+    SOCIAL_SECURITY_NUMBER,
+    AMERICAN_INDIAN_STATUS,
+    CITIZENSHIP,
+    IMMIGRATION_STATUS,
+    ALIVE_STATUS
+  ].freeze
 
-  NON_CITIZEN_IMMIGRATION_TYPES = [LOCATION_RESIDENCY, "Social Security Number", "American Indian Status"].freeze
+  # The location residency verification type is only included in ALL_VERIFICATION_TYPES when the location_residency_verification_type feature is enabled
+  LOCATION_RESIDENCY = EnrollRegistry[:enroll_app].setting(:state_residency).item
+  ALL_VERIFICATION_TYPES += [LOCATION_RESIDENCY] if EnrollRegistry.feature_enabled?(:location_residency_verification_type)
+
+  ADMIN_CALL_HUB_VERIFICATION_TYPES = ALL_VERIFICATION_TYPES - [ALIVE_STATUS, AMERICAN_INDIAN_STATUS].freeze
+
+  NON_CITIZEN_IMMIGRATION_TYPES = [LOCATION_RESIDENCY, SOCIAL_SECURITY_NUMBER, AMERICAN_INDIAN_STATUS].freeze
   VALIDATION_STATES = %w[na unverified pending review outstanding verified attested expired curam rejected].freeze
   OUTSTANDING_STATES = %w[outstanding rejected].freeze
   DUE_DATE_STATES = %w[review outstanding rejected].freeze
@@ -62,7 +59,8 @@ class VerificationType
   scope :by_name, ->(type_name) { where(:type_name => type_name) }
   scope :ssn_type, -> { by_name("Social Security Number").active }
   scope :citizenship_type, -> { by_name("Citizenship").active }
-  scope :alive_status_type, -> { by_name("Alive Status").active }
+  scope :alive_status_type, -> { by_name(ALIVE_STATUS).active }
+  scope :american_indian_status_type, -> { by_name(AMERICAN_INDIAN_STATUS).active }
 
   scope :without_alive_status_type, -> { where(:type_name.ne => ALIVE_STATUS) }
 

@@ -615,8 +615,15 @@ class Person
     end
   end
 
+  # Adds a new verification type to the person.
+  #
+  # If the verification type already exists, it reactivates it by setting `inactive` to false.
+  # If the verification type does not exist, it creates a new verification type with the default status.
+  #
+  # @param new_type [String] the name of the new verification type to add.
+  # @return [void]
   def add_new_verification_type(new_type)
-    default_status = (new_type == VerificationType::LOCATION_RESIDENCY && (consumer_role || resident_role) && age_on(TimeKeeper.date_of_record) < 18) ? "attested" : "unverified"
+    default_status = default_verification_type_status(new_type)
     if verification_types.map(&:type_name).include? new_type
       verification_type_by_name(new_type).update_attributes(:inactive => false)
     else
@@ -624,8 +631,30 @@ class Person
     end
   end
 
+  # Finds a verification type by its name.
+  #
+  # @param type [String] the name of the verification type to find.
+  # @return [VerificationType, nil] the verification type with the given name, or nil if not found.
   def verification_type_by_name(type)
     verification_types.find_by(:type_name => type)
+  end
+
+  # Determines the default verification status for a given verification type.
+  #
+  # @param type [String] the name of the verification type.
+  # @return [String] the default verification status for the given type.
+  #   - "attested" if the type is `VerificationType::AMERICAN_INDIAN_STATUS`.
+  #   - "attested" if the type is `VerificationType::LOCATION_RESIDENCY` and the person is consumer/resident under 18 years old.
+  #   - "unverified" otherwise.
+  def default_verification_type_status(type)
+    case type
+    when VerificationType::LOCATION_RESIDENCY
+      (consumer_role || resident_role) && age_on(TimeKeeper.date_of_record) < 18 ? "attested" : "unverified"
+    when VerificationType::AMERICAN_INDIAN_STATUS
+      "attested"
+    else
+      "unverified"
+    end
   end
 
 # collect all ridp_verification_types user in case of unsuccessful ridp
@@ -1423,6 +1452,17 @@ class Person
     return @alive_status if defined? @alive_status
 
     @alive_status = verification_types.where(type_name: VerificationType::ALIVE_STATUS).first
+  end
+
+  # Returns the first verification type that matches 'VerificationType::AMERICAN_INDIAN_STATUS'.
+  # The result is memoized, so subsequent calls will return the previously computed value
+  # without querying the database again.
+  #
+  # @return [VerificationType, nil] the first verification type that matches 'VerificationType::AMERICAN_INDIAN_STATUS', or nil if no such verification type exists.
+  def american_indian_status
+    return @american_indian_status if defined? @american_indian_status
+
+    @american_indian_status = verification_types.where(type_name: VerificationType::AMERICAN_INDIAN_STATUS).first
   end
 
   # In order to avoid adding another callback,

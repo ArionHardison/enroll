@@ -20,10 +20,10 @@ RSpec.describe VerificationType, :type => :model, dbclean: :after_each do
       it "doesn't have ssn type" do
         person.ssn = nil
         person.save
-        expect(person.consumer_role.verification_types.by_name("Social Security Number").first).to be nil
+        expect(person.consumer_role.verification_types.by_name(VerificationType::SOCIAL_SECURITY_NUMBER).first).to be nil
       end
       it "builds ssn type" do
-        expect(person.consumer_role.verification_types.by_name("Social Security Number").first).not_to be nil
+        expect(person.consumer_role.verification_types.by_name(VerificationType::SOCIAL_SECURITY_NUMBER).first).not_to be nil
       end
     end
     context "local Residency" do
@@ -35,12 +35,12 @@ RSpec.describe VerificationType, :type => :model, dbclean: :after_each do
       it "build American Indian Status type" do
         person.tribal_id = "4848477"
         person.save
-        expect(person.consumer_role.verification_types.by_name("American Indian Status").first).not_to be nil
+        expect(person.consumer_role.verification_types.by_name(VerificationType::AMERICAN_INDIAN_STATUS).first).not_to be nil
       end
       it "doesn't build American Indian Status type" do
         person.tribal_id = nil
         person.save
-        expect(person.consumer_role.verification_types.by_name("American Indian Status").first).to be nil
+        expect(person.consumer_role.verification_types.by_name(VerificationType::AMERICAN_INDIAN_STATUS).first).to be nil
       end
     end
   end
@@ -161,7 +161,7 @@ RSpec.describe VerificationType, :type => :model, dbclean: :after_each do
 
   describe 'is_type_outstanding?' do
     let!(:person) { FactoryBot.create(:person, :with_consumer_role) }
-    let!(:ver_type) { person.verification_types.create!(type_name: 'Citizenship', validation_status: 'unverified') }
+    let!(:ver_type) { person.verification_types.create!(type_name: VerificationType::CITIZENSHIP, validation_status: 'unverified') }
 
     context 'for outstanding' do
       let(:person) { FactoryBot.create(:person, :with_family, :with_consumer_role)}

@@ -663,6 +663,7 @@ RSpec.describe ConsumerRole, dbclean: :after_each, type: :model do
           it_behaves_like 'IVL state machine transitions and workflow', nil, 'us_citizen', false, 'outstanding', :unverified, :verification_outstanding, 'coverage_purchased!'
           it_behaves_like 'IVL state machine transitions and workflow', nil, 'us_citizen', true,  'valid', :unverified, :verification_outstanding, 'coverage_purchased!'
           it 'update ssn with callback fail_ssa_for_no_ssn' do
+            allow(EnrollRegistry).to receive(:feature_enabled?).with(:validate_and_record_publish_errors).and_return(false)
             allow(person).to receive(:ssn).and_return nil
             allow(consumer).to receive(:citizen_status).and_return 'us_citizen'
             consumer.coverage_purchased! verification_attr
@@ -712,6 +713,7 @@ RSpec.describe ConsumerRole, dbclean: :after_each, type: :model do
         describe "pending verification type updates" do
           before do
             allow(EnrollRegistry[:alive_status].feature).to receive(:is_enabled).and_return(true)
+            allow(EnrollRegistry).to receive(:feature_enabled?).with(:ai_an_self_attestation).and_return(false)
           end
 
           it "updates validation status to pending for unverified consumers" do
@@ -719,14 +721,14 @@ RSpec.describe ConsumerRole, dbclean: :after_each, type: :model do
             expect(consumer.verification_types.map(&:validation_status)).to eq(["pending", "pending", "pending", "unverified"])
           end
 
-          it "updates indian tribe validition status to negative_response_received and to pending for the rest" do
+          it "updates indian tribe validition status to negative_response_received and to pending or unverified for the rest" do
             consumer.tribal_id = "345543345"
             consumer.coverage_purchased!
             consumer.verification_types.each do |verif|
               case verif.type_name
-              when 'American Indian Status'
+              when VerificationType::AMERICAN_INDIAN_STATUS
                 expect(verif.validation_status).to eq('negative_response_received')
-              when 'Citizenship', 'Alive Status'
+              when VerificationType::CITIZENSHIP, VerificationType::ALIVE_STATUS
                 # Validation Status stays same as we will not make DHS call for people who are 'us_citizen'
                 expect(verif.validation_status).to eq('unverified')
               else
@@ -735,6 +737,27 @@ RSpec.describe ConsumerRole, dbclean: :after_each, type: :model do
             end
           end
 
+          context 'when ai_an_self_attestation feature is enabled' do
+            before do
+              allow(EnrollRegistry).to receive(:feature_enabled?).with(:ai_an_self_attestation).and_return(true)
+            end
+
+            it "leaves indian tribe validition status as attested and moves to pending or unverified for the rest" do
+              consumer.tribal_id = "345543345"
+              consumer.coverage_purchased!
+              consumer.verification_types.each do |verif|
+                case verif.type_name
+                when VerificationType::AMERICAN_INDIAN_STATUS
+                  expect(verif.validation_status).to eq('attested')
+                when VerificationType::CITIZENSHIP, VerificationType::ALIVE_STATUS
+                  # Validation Status stays same as we will not make DHS call for people who are 'us_citizen'
+                  expect(verif.validation_status).to eq('unverified')
+                else
+                  expect(verif.validation_status).to eq('pending')
+                end
+              end
+            end
+          end
         end
       end
 
@@ -1048,24 +1071,54 @@ RSpec.describe ConsumerRole, dbclean: :after_each, type: :model do
       let(:consumer_role) {person.consumer_role}
       let(:family) { double("Family", :person_has_an_active_enrollment? => true)}
 
-      before do
-        allow(EnrollRegistry[:indian_alaskan_tribe_details].feature).to receive(:is_enabled).and_return(false)
-      end
-      it 'should fail indian tribe status if person updates native status field' do
-        person.update_attributes(tribal_id: "1234567")
-        consumer_role.update_attributes(aasm_state: "ssa_pending")
-        consumer_role.check_native_status(family, true)
-        expect(consumer_role.verification_types.map(&:type_name)).to include('American Indian Status')
-        expect(consumer_role.aasm_state).to include('verification_outstanding')
+      context 'when AI/AN self attestation is not enabled' do
+        before do
+          allow(EnrollRegistry[:indian_alaskan_tribe_details].feature).to receive(:is_enabled).and_return(false)
+          allow(EnrollRegistry).to receive(:feature_enabled?).with(:ai_an_self_attestation).and_return(false)
+        end
+
+        it 'should fail indian tribe status if person updates native status field' do
+          person.update_attributes(tribal_id: "1234567")
+          consumer_role.update_attributes(aasm_state: "ssa_pending")
+          result = consumer_role.check_native_status(family, true)
+          expect(result).to eq true # indicates fail_native_status! was successful, in this context
+          expect(consumer_role.verification_types.map(&:type_name)).to include('American Indian Status')
+          expect(person.american_indian_status.validation_status).to eq('negative_response_received')
+          expect(consumer_role.aasm_state).to include('verification_outstanding')
+        end
+
+        it 'should NOT fail indian tribe status if no change in native status' do
+          consumer_role.update_attributes(aasm_state: "ssa_pending")
+          result = consumer_role.check_native_status(family, true)
+          expect(result).to eq nil # indicates fail_native_status! was not called
+          expect(consumer_role.verification_types.map(&:type_name)).not_to include('American Indian Status')
+          expect(consumer_role.aasm_state).to include('ssa_pending')
+        end
       end
 
-      it 'should fail indian tribe status if no change in native status' do
-        consumer_role.update_attributes(aasm_state: "ssa_pending")
-        consumer_role.check_native_status(family, true)
-        expect(consumer_role.verification_types.map(&:type_name)).not_to include('American Indian Status')
-        expect(consumer_role.aasm_state).to include('ssa_pending')
-      end
+      context 'when AI/AN self attestation is enabled' do
+        before do
+          allow(EnrollRegistry[:indian_alaskan_tribe_details].feature).to receive(:is_enabled).and_return(false)
+          allow(EnrollRegistry).to receive(:feature_enabled?).with(:ai_an_self_attestation).and_return(true)
+        end
 
+        it 'should NOT fail indian tribe status if person updates native status field' do
+          person.update_attributes(tribal_id: "1234567")
+          consumer_role.update_attributes(aasm_state: "ssa_pending")
+          result = consumer_role.check_native_status(family, true)
+          expect(result).to eq nil # indicates fail_native_status! was not called
+          expect(consumer_role.verification_types.map(&:type_name)).to include('American Indian Status')
+          expect(consumer_role.aasm_state).to include('ssa_pending')
+        end
+
+        it 'should NOT fail indian tribe status if no change in native status' do
+          consumer_role.update_attributes(aasm_state: "ssa_pending")
+          result = consumer_role.check_native_status(family, true)
+          expect(result).to eq nil # indicates fail_native_status! was not called
+          expect(consumer_role.verification_types.map(&:type_name)).not_to include('American Indian Status')
+          expect(consumer_role.aasm_state).to include('ssa_pending')
+        end
+      end
     end
 
     describe "#check_for_critical_changes" do
@@ -1184,6 +1237,7 @@ RSpec.describe ConsumerRole, dbclean: :after_each, type: :model do
   describe "Indian tribe member" do
     before do
       allow(EnrollRegistry[:indian_alaskan_tribe_details].feature).to receive(:is_enabled).and_return(false)
+      allow(EnrollRegistry).to receive(:feature_enabled?).with(:ai_an_self_attestation).and_return(false)
     end
     let(:person) { FactoryBot.create(:person, :with_consumer_role) }
     let(:consumer_role) { person.consumer_role }
@@ -1191,7 +1245,7 @@ RSpec.describe ConsumerRole, dbclean: :after_each, type: :model do
     let(:verification_attr) { OpenStruct.new({ :determined_at => Time.zone.now, :vlp_authority => "ssa" })}
 
     context 'Responses from local hub and ssa hub' do
-      it 'aasm state should be in fully_verified if dc response is valid and consumer is tribe member' do
+      it 'aasm state should be in fully_verified if residency response is valid and consumer is tribe member' do
         person.update_attributes!(tribal_id: "12345")
         consumer_role.coverage_purchased!(verification_attr)
         consumer_role.pass_residency!
@@ -1199,26 +1253,26 @@ RSpec.describe ConsumerRole, dbclean: :after_each, type: :model do
         expect(consumer_role.aasm_state).to eq 'fully_verified'
       end
 
-      it 'aasm state should be in fully verified if dc response is valid and consumer is not a tribe member' do
+      it 'aasm state should be in fully verified if residency response is valid and consumer is not a tribe member' do
         consumer_role.fail_residency!
         consumer_role.ssn_valid_citizenship_valid!(verification_attr)
         expect(consumer_role.aasm_state).to eq 'verification_outstanding'
       end
 
-      it 'aasm state should be in verification_outstanding if dc response is negative and consumer is not a tribe member' do
+      it 'aasm state should be in verification_outstanding if residency response is negative and consumer is not a tribe member' do
         consumer_role.fail_residency!
         consumer_role.ssn_valid_citizenship_valid!(verification_attr)
         expect(consumer_role.aasm_state).to eq 'verification_outstanding'
       end
 
-      it 'aasm state should be in fully verified if dc response is positive and consumer is not a tribe member' do
+      it 'aasm state should be in fully verified if residency response is positive and consumer is not a tribe member' do
         consumer_role.update_attributes(is_state_resident: nil)
         consumer_role.ssn_valid_citizenship_valid!(verification_attr)
         consumer_role.pass_residency!
         expect(consumer_role.aasm_state).to eq 'fully_verified'
       end
 
-      it 'aasm state should be in verification_outstanding if dc response is positive and consumer is a tribe member' do
+      it 'aasm state should be in verification_outstanding if residency response is positive and consumer is a tribe member' do
         consumer_role.update_attributes(is_state_resident: nil)
         person.update_attributes!(tribal_id: "12345")
         consumer_role.ssn_valid_citizenship_valid!(verification_attr)
@@ -1228,12 +1282,27 @@ RSpec.describe ConsumerRole, dbclean: :after_each, type: :model do
     end
 
     context 'american indian verification type on coverage purchase' do
-      it 'aasm state should be in verification negative_response_received and american indian status in outstanding upon coverage purchase' do
+      it 'aasm state should be in verification_outstanding and american indian status in negative_response_received upon coverage purchase' do
         person.update_attributes!(tribal_id: "12345")
         consumer_role.coverage_purchased!(verification_attr)
-        american_indian_status = consumer_role.verification_types.by_name("American Indian Status").first
+        american_indian_status = person.american_indian_status
         expect(american_indian_status.validation_status).to eq 'negative_response_received'
         expect(consumer_role.aasm_state).to eq 'verification_outstanding'
+      end
+
+      context 'when ai_an_self_attestation is enabled' do
+        before do
+          allow(EnrollRegistry).to receive(:feature_enabled?).with(:ai_an_self_attestation).and_return(true)
+        end
+
+        it 'aasm state should be in verification_outstanding and american indian status in attested upon coverage purchase' do
+          person.update_attributes!(tribal_id: "12345")
+          consumer_role.coverage_purchased!(verification_attr)
+          american_indian_status = person.american_indian_status
+          expect(american_indian_status.validation_status).to eq 'attested'
+          # aasm_sate will be in outstanding b/c ssn verification has been triggered
+          expect(consumer_role.aasm_state).to eq 'verification_outstanding'
+        end
       end
     end
 
@@ -1243,7 +1312,7 @@ RSpec.describe ConsumerRole, dbclean: :after_each, type: :model do
         consumer_role.coverage_purchased!(verification_attr)
         consumer_role.pass_residency!
         consumer_role.ssn_valid_citizenship_valid!(verification_attr)
-        american_indian_status = consumer_role.verification_types.by_name("American Indian Status").first
+        american_indian_status = person.american_indian_status
         consumer_role.update_verification_type(american_indian_status, "admin verified")
         expect(consumer_role.aasm_state).to eq 'fully_verified'
         expect(american_indian_status.validation_status).to eq 'verified'
@@ -1257,7 +1326,7 @@ RSpec.describe ConsumerRole, dbclean: :after_each, type: :model do
         consumer_role.coverage_purchased!(verification_attr)
         consumer_role.pass_residency!
         consumer_role.ssn_valid_citizenship_valid!(verification_attr)
-        american_indian_status = consumer_role.verification_types.by_name("American Indian Status").first
+        american_indian_status = person.american_indian_status
         consumer_role.return_doc_for_deficiency(american_indian_status, 'Invalid Document')
         expect(consumer_role.aasm_state).to eq 'verification_outstanding'
         expect(american_indian_status.validation_status).to eq 'rejected'

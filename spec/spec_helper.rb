@@ -67,6 +67,13 @@ RSpec.configure do |config|
     request.env['HTTP_ACCEPT_LANGUAGE'] = "en"
   end
 
+  # Stubbing EnrollRegistry here so it behaves like normal when some feature is stubbed specifically in a spec.
+  # This avoids having to stub EnrollRegistry this way in each spec individually.
+  config.before :each do
+    allow(EnrollRegistry).to receive(:[]).and_call_original
+    allow(EnrollRegistry).to receive(:feature_enabled?).and_call_original
+  end
+
   # The settings below are suggested to provide a good initial experience
   # with RSpec, but feel free to customize to your heart's content.
 =begin

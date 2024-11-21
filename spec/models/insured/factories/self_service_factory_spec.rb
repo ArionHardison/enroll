@@ -407,6 +407,7 @@ module Insured
           before :each do
             allow(EnrollRegistry).to receive(:[]).with(:service_area).and_return(setting)
             allow(setting).to receive(:settings).with(:service_area_model).and_return(double(item: 'county'))
+            ::BenefitMarkets::Locations::ServiceArea.all.update_all(covered_states: nil)
           end
 
           it 'should not create new enrollment and raises error' do

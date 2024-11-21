@@ -1000,8 +1000,9 @@ class ConsumerRole
   end
 
   def check_native_status(family, native_status_changed)
-    return unless native_status_changed
-    return unless family&.person_has_an_active_enrollment?(person)
+    return if EnrollRegistry.feature_enabled?(:ai_an_self_attestation)
+    return unless native_status_changed && family&.person_has_an_active_enrollment?(person)
+
     if (EnrollRegistry[:indian_alaskan_tribe_details].enabled? && person.tribal_state.present? && check_tribal_name.present?) || person.tribal_id.present?
       fail_indian_tribe
       fail_native_status!
@@ -1200,6 +1201,9 @@ class ConsumerRole
   end
 
   def fail_indian_tribe
+    # American Indian Status verification type is not failable when self attestation is enabled
+    return if EnrollRegistry.feature_enabled?(:ai_an_self_attestation)
+
     verification_types.by_name("American Indian Status").first.fail_type if verification_types.by_name("American Indian Status").first
   end
 

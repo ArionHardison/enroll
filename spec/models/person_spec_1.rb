@@ -94,14 +94,43 @@ RSpec.describe Person, type: :model do
   describe '#add_new_verification_type' do
     let(:person) { FactoryBot.create(:person, :with_consumer_role, :with_active_consumer_role) }
 
-    before do
-      person.add_new_verification_type(VerificationType::ALIVE_STATUS)
+    context 'Alive Status verification type' do
+      before do
+        person.add_new_verification_type(VerificationType::ALIVE_STATUS)
+      end
+
+      it 'returns Alive Status' do
+        expect(person.reload.alive_status).to be_a(VerificationType)
+        expect(person.alive_status.type_name).to eq(VerificationType::ALIVE_STATUS)
+        expect(person.alive_status.validation_status).to eq('unverified')
+      end
     end
 
-    it 'returns Alive status' do
-      expect(person.reload.alive_status).to be_a(VerificationType)
-      expect(person.alive_status.type_name).to eq(VerificationType::ALIVE_STATUS)
-      expect(person.alive_status.validation_status).to eq('unverified')
+    context 'American Indian Status verification type' do
+      context 'verification type does not exist' do
+        before do
+          person.add_new_verification_type(VerificationType::AMERICAN_INDIAN_STATUS)
+        end
+
+        it 'creates the verification type with the correct default status' do
+          expect(person.reload.american_indian_status).to be_a(VerificationType)
+          expect(person.american_indian_status.type_name).to eq(VerificationType::AMERICAN_INDIAN_STATUS)
+          expect(person.american_indian_status.validation_status).to eq('attested')
+        end
+      end
+
+      context 'inactive verification type already exists' do
+        before do
+          person.add_new_verification_type(VerificationType::AMERICAN_INDIAN_STATUS)
+          person.american_indian_status.set({ inactive: true })
+        end
+
+        it 'sets the verification type to active' do
+          expect(person.american_indian_status.inactive).to be_truthy
+          person.add_new_verification_type(VerificationType::AMERICAN_INDIAN_STATUS) # update the existing type
+          expect(person.reload.american_indian_status.inactive).to be_falsey
+        end
+      end
     end
   end
 
@@ -114,7 +143,7 @@ RSpec.describe Person, type: :model do
       current_hbx_id = person.hbx_id
       person.hbx_id = new_hbx_id
       person.save!
-      expect(person.hbx_id).to eq(new_hbx_id)
+      expect(person.hbx_id.to_s).to eq(new_hbx_id.to_s)
       expect(
         person.history_tracks.where(
           action: 'update',

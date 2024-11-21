@@ -73,8 +73,7 @@ registry:
                     "Other (With Alien Number)", "Other (With I-94 Number)" ]
       - key: :indian_alaskan_tribe_details
         is_enabled: true
-      - key: ai_an_self_attestation
-        item: ai_an_self_attestation
+      - key: :ai_an_self_attestation
         is_enabled: <%= ENV['AI_AN_SELF_ATTESTATION_IS_ENABLED'] || false %>
       - key: :check_for_crm_updates
         is_enabled: <%= ENV['CHECK_FOR_CRM_UPDATES_IS_ENABLED'] || false %>
