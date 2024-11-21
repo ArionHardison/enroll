@@ -31,7 +31,7 @@ $( "[id^=edit_hbx_enrollment]" ).submit(function( event ) {
             <th><%= l10n('insured.families.hbx_id') %></th>
             <th><%= l10n('plan') %></th>
             <th><%= l10n('hbx_profiles.effective_date') %></th>
-            <th id="termination-date-header"><%= l10n('termination_date') %></th>
+            <th id="termination-date-header"><%= l10n('termination_date').titleize %></th>
             <th id="termination-enrollment-header"><%= l10n('terminate_enrollment') %></th>
             <th id="edi-header"><%= l10n('hbx_profiles.edi') %></th>
           <% else %>
