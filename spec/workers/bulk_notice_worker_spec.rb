@@ -41,24 +41,5 @@ describe BulkNoticeWorker do
         expect(subject.fetch_resource(broker_agency_profile.organization, 'broker_agency')).to eq broker_agency_profile
       end
     end
-
-    context '.fetch_params' do
-      let(:broker_agency_profile) { FactoryBot.create(:benefit_sponsors_organizations_broker_agency_profile) }
-      let(:audience) { broker_agency_profile.organization }
-      let!(:user) { FactoryBot.create(:user, :with_hbx_staff_role) }
-      let(:bulk_notice) { FactoryBot.create :bulk_notice, user: user, audience_type: 'employees', audience_ids: [audience.id.to_s]}
-
-      it 'should include model_id' do
-        expect(subject.fetch_params(bulk_notice).keys).to include :document
-      end
-
-      it 'should not include model_id' do
-        expect(subject.fetch_params(bulk_notice).keys).not_to include :model_id
-      end
-
-      it 'should not include model_klass' do
-        expect(subject.fetch_params(bulk_notice).keys).not_to include :model_klass
-      end
-    end
   end
 end

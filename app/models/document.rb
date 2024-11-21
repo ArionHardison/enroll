@@ -22,7 +22,8 @@ class Document
     "BenefitSponsors::Organizations::GeneralAgencyProfile" => BenefitSponsors::Organizations::GeneralAgencyProfile,
     "EmployeeRole" => EmployeeRole,
     "Person" => Person,
-    "ConsumerRole" => ConsumerRole
+    "ConsumerRole" => ConsumerRole,
+    "Admin::BulkNotice" => Admin::BulkNotice
   }.freeze
 
   after_save :notify_on_save

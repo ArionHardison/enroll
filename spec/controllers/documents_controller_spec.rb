@@ -480,6 +480,23 @@ RSpec.describe DocumentsController, dbclean: :after_each, :type => :controller d
       end
     end
 
+    context 'when broker role exists to download admin bulk notice' do
+      context 'is authorized' do
+        let!(:bulk_notice) { FactoryBot.create :bulk_notice, user: broker_role_user, audience_type: 'broker_agency', audience_ids: [broker_agency_profile.organization.id.to_s] }
+
+        before(:each) do
+          allow(Operations::Documents::Download).to receive(:call).and_return(Dry::Monads::Success(tempfile))
+          sign_in broker_role_user
+        end
+
+        it 'should be able to download' do
+          get :cartafact_download, params: {model: "Admin::BulkNotice", model_id: bulk_notice.id, relation: "documents", relation_id: document.id}
+          expect(response.status).to eq(200)
+          expect(response.headers["Content-Disposition"]).to eq 'attachment'
+        end
+      end
+    end
+
     context 'when hbx staff role' do
       context 'is authorized' do
         it 'should be able to download' do
