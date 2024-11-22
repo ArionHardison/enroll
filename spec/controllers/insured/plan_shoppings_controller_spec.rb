@@ -1383,6 +1383,35 @@ RSpec.describe Insured::PlanShoppingsController, :type => :controller, dbclean: 
         hbx_enrollment.reload
         expect(hbx_enrollment.hbx_enrollment_members.first.coverage_start_on).to eq hbx_enrollment.effective_on
       end
+
+      context "when member is already enrolled and plan shops" do
+        let!(:hbx_profile) do
+          FactoryBot.create(:hbx_profile,
+                            :no_open_enrollment_coverage_period,
+                            coverage_year: TimeKeeper.date_of_record.year)
+        end
+
+        let!(:expected_product) do
+          benefit_sponsorship = HbxProfile.current_hbx.benefit_sponsorship
+          benefit_coverage_period = benefit_sponsorship.current_benefit_period
+          benefit_coverage_period.elected_plans_by_enrollment_members(hbx_enrollment.hbx_enrollment_members, hbx_enrollment.coverage_kind, nil, "individual").last
+        end
+
+        let!(:coverage_selected_enrollment) {family.hbx_enrollments.coverage_selected.first.update_attributes(product_id: expected_product.id)}
+        let!(:shopping_enrollment) do
+          hbx_enrollment.update_attributes(aasm_state: 'shopping')
+          hbx_enrollment
+        end
+
+        before do
+          sign_in user
+          get :plans, params: { id: shopping_enrollment.id, year: year, market_kind: "individual", coverage_kind: "health", change_plan: "change_by_qle"}
+        end
+
+        it "should return enrolled product first in the list" do
+          expect(assigns(:plans).first.id.to_s).to eq expected_product.id.to_s
+        end
+      end
     end
 
     context "Post set_elected_aptc", :dbclean => :around_each do

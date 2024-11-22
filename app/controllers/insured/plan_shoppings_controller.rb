@@ -274,6 +274,9 @@ class Insured::PlanShoppingsController < ApplicationController
     set_admin_bookmark_url(family_account_path)
     set_plans_by(hbx_enrollment_id: params.require(:id))
 
+    @current_plan_id = @hbx_enrollment.family.current_plan_for_badge(@hbx_enrollment)
+    @enrolled_hbx_enrollment_plan_ids = [@current_plan_id] if @current_plan_id.present? && @enrolled_hbx_enrollment_plan_ids.blank?
+
     if EnrollRegistry.feature_enabled?(:temporary_configuration_enable_multi_tax_household_feature)
       aptc_grants(@hbx_enrollment.family, @hbx_enrollment.effective_on.year) if @person.present?
     else
@@ -299,7 +302,6 @@ class Insured::PlanShoppingsController < ApplicationController
     @plan_hsa_status = Products::Qhp.plan_hsa_status_map(@plans)
     @change_plan = params[:change_plan].present? ? params[:change_plan] : ''
     @enrollment_kind = params[:enrollment_kind].present? ? params[:enrollment_kind] : ''
-    @current_plan = @hbx_enrollment.family.current_plan_for_badge(@hbx_enrollment)
   end
   # rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity
 
