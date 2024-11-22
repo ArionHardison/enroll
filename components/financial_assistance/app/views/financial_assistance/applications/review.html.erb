@@ -3,25 +3,23 @@
   <%= render partial: 'shared/family_side_nav' %>
 
   <%# Main Content (right) %>
-  <div id='printSection'>
-    <ul class="breadcrumbs">
-      <li><%= l10n('layout.header.home') %></li>
-      <li><%= l10n('faa.applications') %></li>
-      <li><%= l10n('faa.applications.detail') %></li>
-    </ul>
+  <ul class="breadcrumbs">
+    <li><%= l10n('layout.header.home') %></li>
+    <li><%= l10n('faa.applications') %></li>
+    <li><%= l10n('faa.applications.detail') %></li>
+  </ul>
 
-    <h1><%= l10n('faa.applications.detail') %></h1>
+  <h1><%= l10n('faa.applications.detail') %></h1>
 
-    <%= h(link_to l10n('faa.applications.detail.back'), applications_path, class: "btn btn-primary mt-2 mb-3") %>
+  <%= h(link_to l10n('faa.applications.detail.back'), applications_path, class: "btn btn-primary mt-2 mb-3") %>
 
-    <dl class="d-flex">
-      <dt class="mr-4"><%= l10n('faa.applications.detail.id') %></dt>
-      <dd><%= @application.hbx_id %></dd>
-    </dl>
-    <%= render partial: "summary" %>
+  <dl class="d-flex">
+    <dt class="mr-4"><%= l10n('faa.applications.detail.id') %></dt>
+    <dd><%= @application.hbx_id %></dd>
+  </dl>
+  <%= render partial: "summary" %>
 
-    <%= h(link_to l10n("faa.applications.detail.back"), applications_path, class: "btn btn-primary mt-2") %>
-  </div>
+  <%= h(link_to l10n("faa.applications.detail.back"), applications_path, class: "btn btn-primary mt-2") %>
 <% else %>
   <div class="container">
     <div class="col-lg-10 col-md-10 col-sm-10 col-xs-12 row">

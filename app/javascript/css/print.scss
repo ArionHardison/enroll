@@ -18,29 +18,32 @@
     background: none !important;
   }
 
-  body * {
-    visibility: hidden;
+  .has-print-area {
+    body * {
+      visibility: hidden;
+    }
+  
+    #printSection,
+    #printSection * {
+      visibility: visible;
+    }
+  
+    #printSection {
+      position: absolute !important;
+      page-break-inside: avoid;
+      overflow: visible;
+      left: 0;
+      top: 0;
+    }
+  
+    #printArea {
+      display: none !important;
+    }
+    #printSection #printArea {
+      display: block !important;
+    }
   }
-
-  #printSection,
-  #printSection * {
-    visibility: visible;
-  }
-
-  #printSection {
-    position: static !important;
-    page-break-inside: avoid;
-    overflow: visible;
-    left: 0;
-    top: 0;
-  }
-
-  #printArea {
-    display: none !important;
-  }
-  #printSection #printArea {
-    display: block !important;
-  }
+  
   .btn-print,
   nav,
   header,

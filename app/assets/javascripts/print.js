@@ -12,6 +12,7 @@ $(document).on('click', '.btn-print', function(){
 });
 
 function printElement(elem, append, delimiter) {
+  document.documentElement.classList.add("has-print-area");
   var domClone = elem.cloneNode(true);
 
   var $printSection = document.getElementById("printSection");
@@ -44,4 +45,5 @@ window.addEventListener("afterprint", (event) => {
   if (printArea) {
     printArea.remove()
   }
+  document.documentElement.classList.remove("has-print-area");
 });
