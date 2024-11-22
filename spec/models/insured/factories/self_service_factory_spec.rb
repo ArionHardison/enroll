@@ -546,6 +546,18 @@ module Insured
           params = subject.find(enrollment.id, family.id)
           expect(params[:max_tax_credit]).to eq 1700.0
         end
+
+        context 'calculate_elected_aptc_pct' do
+          it 'should calculate elected aptc pct based on the available aptc' do
+            enrollment.set(applied_aptc_amount: 1500.0)
+            params = subject.find(enrollment.id, family.id)
+            elected_pct_using_max_tax_credit = enrollment.applied_aptc_amount.to_f / params[:max_tax_credit]
+            elected_pct_using_available_aptc = enrollment.applied_aptc_amount.to_f / params[:available_aptc]
+
+            expect(params[:elected_aptc_pct]).to eq elected_pct_using_available_aptc
+            expect(params[:elected_aptc_pct]).not_to eq elected_pct_using_max_tax_credit
+          end
+        end
       end
     end
 

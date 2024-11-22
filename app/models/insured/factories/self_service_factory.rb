@@ -185,7 +185,7 @@ module Insured
         qle                       = QualifyingLifeEventKind.find(BSON::ObjectId.from_string(sep.qualifying_life_event_kind_id))  if sep.present?
         available_aptc            = calculate_max_applicable_aptc(enrollment, new_effective_on)
         max_tax_credit            = calculate_max_tax_credit(enrollment, new_effective_on)
-        elected_aptc_pct          = calculate_elected_aptc_pct(enrollment, available_aptc, max_tax_credit)
+        elected_aptc_pct          = calculate_elected_aptc_pct(enrollment, available_aptc)
         default_tax_credit_value  = default_tax_credit_value(enrollment, available_aptc)
         {
           enrollment: enrollment,
@@ -265,12 +265,8 @@ module Insured
         enrollment.applied_aptc_amount.to_f > available_aptc ? available_aptc : enrollment.applied_aptc_amount.to_f
       end
 
-      def calculate_elected_aptc_pct(enrollment, available_aptc, max_aptc)
-        pct = if EnrollRegistry.feature_enabled?(:temporary_configuration_enable_multi_tax_household_feature)
-                float_fix(enrollment.applied_aptc_amount.to_f / max_aptc).round(2)
-              else
-                float_fix(enrollment.applied_aptc_amount.to_f / available_aptc).round(2)
-              end
+      def calculate_elected_aptc_pct(enrollment, available_aptc)
+        pct = float_fix(enrollment.applied_aptc_amount.to_f / available_aptc).round(2)
         pct > 1 ? 1 : pct
       end
 
