@@ -225,6 +225,9 @@ table {
 .dataTables_length {
   margin-left: $spacer / 2;
   label {font-weight: 400}
+  label > select {
+    padding-right: 1.25em;
+  }
 }
 
 .container:has(#effective_datatable_wrapper) {
