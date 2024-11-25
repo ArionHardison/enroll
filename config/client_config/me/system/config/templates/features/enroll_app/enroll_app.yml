@@ -22,9 +22,9 @@ registry:
           - key: :policies_url
             item: ''
           - key: :faqs_url
-            item: 'https://www.coverme.gov/support/find-help'
+            item: ''
           - key: :help_url
-            item: 'https://www.coverme.gov/help/'
+            item: 'https://www.coverme.gov/support/find-help'
           - key: :business_resource_center_url
             item: ''
           - key: :nondiscrimination_notice_url
@@ -47,8 +47,6 @@ registry:
             item: 'https://cme.enroll.openhbx.org/'
           - key: :home_business_url
             item: 'https://www.coverme.gov'
-          - key: :help_url
-            item: 'https://www.coverme.gov/help/'
           - key: :main_web_address_url
             item: 'https://www.coverme.gov'
           - key: :invoice_bill_url

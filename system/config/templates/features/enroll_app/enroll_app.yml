@@ -47,8 +47,6 @@ registry:
             item: "https://www.dchealthlink.com/"
           - key: :home_business_url
             item: "https://www.dchealthlink.com/smallbusiness/overview"
-          - key: :help_url
-            item: "https://www.dchealthlink.com/help"
           - key: :main_web_address_url
             item: "https://www.dchealthlink.com/"
           - key: :invoice_bill_url
