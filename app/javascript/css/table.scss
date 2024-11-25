@@ -286,5 +286,8 @@ table {
         margin-left: 4px;
       }
     }
+    tbody td table td, tbody td table td.standard {
+      font-size: 16px;
+    }
   }
 }
