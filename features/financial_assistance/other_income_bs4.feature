@@ -28,3 +28,9 @@ Feature: Start a new Financial Assistance Application and fills out Other Income
     Then the user should see the end date warning note above the form
     And the user enters an end date
     Then the user should see the end date warning modal
+
+  Scenario: User enters other income information with an end date longer than 4 digits
+    Given the user answers yes to having other income
+    And the user checks a other income checkbox
+    And the user enters a too long end date
+    Then the user should see a cut off date

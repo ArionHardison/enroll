@@ -88,6 +88,15 @@ And(/^the user enters an end date$/) do
   find(IvlIapJobIncomeInformationPage.calendar).click unless EnrollRegistry.feature_enabled?(:bs4_consumer_flow)
 end
 
+And(/^the user enters a too long end date$/) do
+  fill_in IvlIapJobIncomeInformationPage.income_to, with: "12/01/202424"
+  find(IvlIapJobIncomeInformationPage.calendar).click unless EnrollRegistry.feature_enabled?(:bs4_consumer_flow)
+end
+
+Then(/^the user should see a cut off date$/) do
+  expect(find_field(IvlIapJobIncomeInformationPage.income_to).value.length).to eq 10
+end
+
 Then(/^the user should see the end date warning message$/) do
   find("#date_warnings_list", wait: 5)
   expect(page).not_to have_selector(IvlIapJobIncomeInformationPage.start_date_warning)

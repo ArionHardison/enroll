@@ -57,7 +57,7 @@
         <legend>
           <label class="weight-n <%= 'required' if FinancialAssistanceRegistry.feature_enabled?(:pregnancy_due_on_required) %>" for="applicant_pregnancy_due_on"><%= l10n("faa.other_ques.pregnancy_due_date") %></label>
         </legend>
-        <%= f.date_field :pregnancy_due_on, id: "applicant_pregnancy_due_on", placeholder: "MM/DD/YYYY" %>
+        <%= f.date_field :pregnancy_due_on, id: "applicant_pregnancy_due_on", min: 110.years.ago, max:"9999-12-31" %>
       </fieldset>
 
       <fieldset class="mb-4 row-form-wrapper">
@@ -80,7 +80,7 @@
         <legend>
           <label class="weight-n required" for="applicant_pregnancy_end_on"><%= l10n("faa.other_ques.pregnancy_end") %></label>
         </legend>
-        <%= f.date_field :pregnancy_end_on, id: "applicant_pregnancy_end_on", placeholder: "MM/DD/YYYY" %>
+        <%= f.date_field :pregnancy_end_on, id: "applicant_pregnancy_end_on", min: 110.years.ago, max:"9999-12-31" %>
       </fieldset>
 
       <% if @applicant.present? && @applicant.is_applying_coverage %>
@@ -143,7 +143,7 @@
               <legend>
                 <label class="weight-n" for="applicant_student_status_end_on"><%= l10n("faa.other_ques.student_status_end") %></label>
               </legend>
-              <%= f.date_field :student_status_end_on, id: "applicant_student_status_end_on", placeholder: "MM/DD/YYYY" %>
+              <%= f.date_field :student_status_end_on, id: "applicant_student_status_end_on", min: 110.years.ago, max:"9999-12-31" %>
             </fieldset>
 
             <fieldset class="mb-4 row-form-wrapper">
