@@ -22,6 +22,28 @@ describe Queries::BrokerAgencyDatatableQuery, dbclean: :after_each do
   end
 
   context "performs search" do
+    shared_examples "builds scope with selector for search query" do |broker_name_search_flag_enabled:|
+      before do
+        subject.instance_variable_set(:@search_string, search_query)
+        allow(EnrollRegistry).to receive(:feature_enabled?).with(:sensor_tobacco_carrier_usage).and_return(false)
+        allow(EnrollRegistry).to receive(:feature_enabled?).with(:broker_table_staff_name_search).and_return(broker_name_search_flag_enabled)
+      end
+
+      it "builds scope with selector for search query" do
+        expect(subject.build_scope.selector).to eq(
+          {
+            "profiles._type" => /.*BrokerAgencyProfile$/,
+            "$or" => [
+              {"legal_name" => /#{search_query}/i},
+              {"fein" => /#{search_query}/i},
+              {"hbx_id" => /#{search_query}/i},
+              {"profiles._id" => {"$in" => broker_name_search_flag_enabled ? [profile.id] : []}}
+            ]
+          }
+        )
+      end
+    end
+
     let!(:search_query) { "test_search_query" }
     let!(:profile) do
       profile = FactoryBot.create(:broker_agency_profile)
@@ -33,21 +55,8 @@ describe Queries::BrokerAgencyDatatableQuery, dbclean: :after_each do
       profile
     end
 
-    before { subject.instance_variable_set(:@search_string, search_query) }
-
-    it "builds scope with selector for search query" do
-      expect(subject.build_scope.selector).to eq(
-        {
-          "profiles._type" => /.*BrokerAgencyProfile$/,
-          "$or" => [
-            {"legal_name" => /#{search_query}/i},
-            {"fein" => /#{search_query}/i},
-            {"hbx_id" => /#{search_query}/i},
-            {"profiles._id" => {"$in" => [profile.id]}}
-          ]
-        }
-      )
-    end
+    it_behaves_like "builds scope with selector for search query", broker_name_search_flag_enabled: true
+    it_behaves_like "builds scope with selector for search query", broker_name_search_flag_enabled: false
   end
 
   context "performs order" do

@@ -177,7 +177,11 @@ module BenefitSponsors
       scope :employer_profiles_enrolled,    -> {}
 
       scope :datatable_search, lambda { |query|
-                                 people_agency_ids = Person.all_broker_staff_roles.where(Person.search_hash(query.strip)).map{|p| p.broker_agency_staff_roles.pluck(:benefit_sponsors_broker_agency_profile_id).flatten}.flatten
+                                 people_agency_ids = if EnrollRegistry.feature_enabled?(:broker_table_staff_name_search)
+                                                       Person.all_broker_staff_roles.where(Person.search_hash(query.strip)).map{|p| p.broker_agency_staff_roles.pluck(:benefit_sponsors_broker_agency_profile_id).flatten}.flatten
+                                                     else
+                                                       []
+                                                     end
                                  self.where({"$or" => [
                                   {"legal_name" => ::Regexp.compile(::Regexp.escape(query), true)},
                                   {"fein" => ::Regexp.compile(::Regexp.escape(query), true)},
