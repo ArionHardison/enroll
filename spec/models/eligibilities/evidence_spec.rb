@@ -843,6 +843,36 @@ RSpec.describe ::Eligibilities::Evidence, type: :model, dbclean: :after_each do
     end
   end
 
+  context "rejection reasons" do
+    context "out of income threshold reason enabled" do
+      before do
+        # Because the constants are frozen, we need to remove the model and reload the file
+        # after setting the FF in order to test what happens when the feature is enabled
+        Object.const_get(:Eligibilities).send(:remove_const, :Evidence) if defined?(::Eligibilities::Evidence)
+        allow(EnrollRegistry).to receive(:feature_enabled?).and_return(true)
+        allow(EnrollRegistry).to receive(:feature_enabled?).with(:out_of_income_threshold_reject_reason).and_return(true)
+        load 'app/models/eligibilities/evidence.rb'
+      end
+
+      it "should include Out of Income Threshold as a rejection reason" do
+        expect(::Eligibilities::Evidence::REJECT_REASONS).to include("Out of Income Threshold")
+      end
+    end
+
+    context "out of income threshold reason disabled" do
+      before do
+        Object.const_get(:Eligibilities).send(:remove_const, :Evidence) if defined?(::Eligibilities::Evidence)
+        allow(EnrollRegistry).to receive(:feature_enabled?).and_return(false)
+        allow(EnrollRegistry).to receive(:feature_enabled?).with(:out_of_income_threshold_reject_reason).and_return(false)
+        load 'app/models/eligibilities/evidence.rb'
+      end
+
+      it "should not include Out of Income Threshold as a rejection reason" do
+        expect(::Eligibilities::Evidence::REJECT_REASONS).not_to include("Out of Income Threshold")
+      end
+    end
+  end
+
   context 'move_evidence_to_outstanding' do
     let(:income_evidence) do
       applicant.create_income_evidence(

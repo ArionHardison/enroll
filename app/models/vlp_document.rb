@@ -68,6 +68,8 @@ class VlpDocument < Document
 
   # reasons admin can provide when rejecting verification type. these reasons applied for all verification types
   ALL_TYPES_REJECT_REASONS = ["Illegible", "Incomplete Doc", "Wrong Type", "Wrong Person"]
+  ALL_TYPES_REJECT_REASONS += ["Out of Income Threshold"] if EnrollRegistry.feature_enabled?("out_of_income_threshold_reject_reason")
+
   #additionla reasons for citizenship and immigartion verification types
   CITIZEN_IMMIGR_TYPE_ADD_REASONS = ["Expired"]
   #additional reasons for Income verification types WILL BE IMPLEMENTED LATER

@@ -13,6 +13,7 @@ module FinancialAssistance
     VERIFY_REASONS = EnrollRegistry[:verification_reasons].item
     #add them to registry
     REJECT_REASONS = ["Illegible", "Incomplete Doc", "Wrong Type", "Wrong Person", "Expired", "Too old"].freeze
+    REJECT_REASONS += ["Out of Income Threshold"] if EnrollRegistry.feature_enabled?("out_of_income_threshold_reject_reason")
 
     FDSH_EVENTS = {
       :non_esi_mec => 'fdsh.evidences.esi_determination_requested',

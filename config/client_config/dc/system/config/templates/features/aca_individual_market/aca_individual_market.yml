@@ -107,6 +107,9 @@ registry:
       - key: :verification_reasons
         item: ["Document in EnrollApp", "Document in DIMS", "SAVE system", "E-Verified in Curam", "Salesforce", "Self-Attestation"]
         is_enabled: true
+      - key: :out_of_income_threshold_reject_reason
+        item: :out_of_income_threshold_reject_reason
+        is_enabled: <%= ENV['OUT_OF_INCOME_THRESHOLD_REJECT_REASON_IS_ENABLED'] || false %>
       - key: :total_minimum_responsibility
         is_enabled: false
       - key: :display_ivl_termination_reason

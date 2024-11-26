@@ -32,4 +32,34 @@ RSpec.describe RidpDocument, :type => :model do
       end
     end
   end
+
+  context "rejection reasons" do
+    context "out of income threshold reason enabled" do
+      before do
+        # Because the constants are frozen, we need to remove the model and reload the file
+        # after setting the FF in order to test what happens when the feature is enabled
+        Object.send(:remove_const, :RidpDocument) if Module.const_defined?(:RidpDocument)
+        allow(EnrollRegistry).to receive(:feature_enabled?).and_return(true)
+        allow(EnrollRegistry).to receive(:feature_enabled?).with(:out_of_income_threshold_reject_reason).and_return(true)
+        load 'app/models/ridp_document.rb'
+      end
+
+      it "should include Out of Income Threshold as a rejection reason" do
+        expect(RidpDocument::RETURNING_FOR_DEF_REASONS).to include("Out of Income Threshold")
+      end
+    end
+
+    context "out of income threshold reason disabled" do
+      before do
+        Object.send(:remove_const, :RidpDocument) if Module.const_defined?(:RidpDocument)
+        allow(EnrollRegistry).to receive(:feature_enabled?).and_return(false)
+        allow(EnrollRegistry).to receive(:feature_enabled?).with(:out_of_income_threshold_reject_reason).and_return(false)
+        load 'app/models/ridp_document.rb'
+      end
+
+      it "should not include Out of Income Threshold as a rejection reason" do
+        expect(RidpDocument::RETURNING_FOR_DEF_REASONS).not_to include("Out of Income Threshold")
+      end
+    end
+  end
 end

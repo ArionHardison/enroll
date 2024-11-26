@@ -10,6 +10,7 @@ class RidpDocument < Document
 
   # reasons admin can provide when returning for deficiency verification type
   RETURNING_FOR_DEF_REASONS = ["Illegible Document", "Member Data Change", "Document Expired", "Additional Document Required", "Other"]
+  RETURNING_FOR_DEF_REASONS += ["Out of Income Threshold"] if EnrollRegistry.feature_enabled?("out_of_income_threshold_reject_reason")
 
   RIDP_DOCUMENT_KINDS = ['Driver License']
 

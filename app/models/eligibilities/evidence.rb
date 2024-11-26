@@ -17,6 +17,7 @@ module Eligibilities
 
     VERIFY_REASONS = EnrollRegistry[:verification_reasons].item
     REJECT_REASONS = ["Illegible", "Incomplete Doc", "Wrong Type", "Wrong Person", "Expired", "Too old"].freeze
+    REJECT_REASONS += ["Out of Income Threshold"] if EnrollRegistry.feature_enabled?("out_of_income_threshold_reject_reason")
 
     OUTSTANDING_STATES = ['outstanding', 'rejected'].freeze
 
