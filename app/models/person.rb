@@ -236,9 +236,12 @@ class Person
   index({"broker_role.benefit_sponsors_broker_agency_profile_id" => 1})
   index({"broker_role.npn" => 1}, {sparse: true, unique: true})
 
+  index({"broker_agency_staff_roles.aasm_state" => 1})
+
   index({"general_agency_staff_roles.npn" => 1}, {sparse: true})
   index({"general_agency_staff_roles.is_primary" => 1})
   index({"general_agency_staff_roles.benefit_sponsors_general_agency_profile_id" => 1}, {sparse: true})
+  index({"general_agency_staff_roles.aasm_state" => 1})
 
   index({"first_name" => 1, "last_name" => 1, "broker_role.npn" => 1}, {name: "first_name_last_name_broker_npn_search"})
   index({"first_name" => 1, "last_name" => 1, "general_agency_staff_roles.npn" => 1}, {name: "first_name_last_name_ga_npn_search"})
@@ -329,6 +332,12 @@ class Person
   scope :by_ssn,                    ->(ssn) { where(encrypted_ssn: Person.encrypt_ssn(ssn)) }
   scope :unverified_persons,        -> { where(:'consumer_role.aasm_state' => { "$ne" => "fully_verified" })}
   scope :matchable,                 ->(ssn, dob, last_name) { where(encrypted_ssn: Person.encrypt_ssn(ssn), dob: dob, last_name: last_name) }
+  scope :broker_staff_active_or_pending, -> { where("broker_agency_staff_roles.aasm_state" => { "$in" => [:broker_agency_pending, :active] }) }
+  scope :staff_for_broker_including_pending, ->(broker_profile) { where("broker_agency_staff_roles.benefit_sponsors_broker_agency_profile_id" => broker_profile.id).broker_staff_active_or_pending }
+  scope :staff_for_ga_including_pending, lambda { |general_agency_profile|
+    where("general_agency_staff_roles.benefit_sponsors_general_agency_profile_id" => general_agency_profile.id)
+      .where("general_agency_staff_roles.aasm_state" => { "$in" => [:general_agency_pending, :active] })
+  }
 
   scope :general_agency_staff_applicant,     -> { where("general_agency_staff_roles.aasm_state" => { "$eq" => :applicant })}
   scope :general_agency_staff_certified,     -> { where("general_agency_staff_roles.aasm_state" => { "$eq" => :active })}
@@ -1180,48 +1189,6 @@ class Person
       end
     end
 
-    def staff_for_broker_including_pending(broker_profile)
-      Person.where(:broker_agency_staff_roles =>
-                     {
-                       '$elemMatch' => {
-                         '$and' => [
-                           {
-                             '$or' => [
-                               {benefit_sponsors_broker_agency_profile_id: broker_profile.id}
-                             ]
-                           },
-                           {
-                             '$or' => [
-                               {aasm_state: :broker_agency_pending},
-                               {aasm_state: :active}
-                             ]
-                           }
-                         ]
-                       }
-                     })
-    end
-
-    def staff_for_ga_including_pending(general_agency_profile)
-      Person.where(:general_agency_staff_roles =>
-                     {
-                       '$elemMatch' => {
-                         '$and' => [
-                           {
-                             '$or' => [
-                               {benefit_sponsors_general_agency_profile_id: general_agency_profile.id}
-                             ]
-                           },
-                           {
-                             '$or' => [
-                               {aasm_state: :general_agency_pending},
-                               {aasm_state: :active}
-                             ]
-                           }
-                         ]
-                       }
-                     })
-    end
-
     # Adds employer staff role to person
     # Returns status and message if failed
     # Returns status and person if successful
@@ -1260,7 +1227,6 @@ class Person
         return false, 'No matching employer staff role'
       end
     end
-
   end
 
   # HACK

@@ -516,6 +516,7 @@ module BenefitSponsors
 
         it 'should terminate broker agency staff role' do
           expect(person.reload.broker_agency_staff_roles.first.aasm_state).to eq "broker_agency_terminated"
+          expect(Person.staff_for_broker_including_pending(broker_agency_profile).count).to eq 0
         end
       end
 
@@ -533,6 +534,7 @@ module BenefitSponsors
 
         it 'should not terminate other broker agency staff role' do
           expect(person.reload.broker_agency_staff_roles.first.aasm_state).to eq "active"
+          expect(Person.staff_for_broker_including_pending(broker_agency_profile).count).to eq 1
         end
       end
     end

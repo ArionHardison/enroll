@@ -178,7 +178,7 @@ module BenefitSponsors
 
       scope :datatable_search, lambda { |query|
                                  people_agency_ids = if EnrollRegistry.feature_enabled?(:broker_table_staff_name_search)
-                                                       Person.all_broker_staff_roles.where(Person.search_hash(query.strip)).map{|p| p.broker_agency_staff_roles.pluck(:benefit_sponsors_broker_agency_profile_id).flatten}.flatten
+                                                       Person.broker_staff_active_or_pending.where(Person.search_hash(query.strip)).map{|p| p.broker_agency_staff_roles.pluck(:benefit_sponsors_broker_agency_profile_id).flatten}.flatten
                                                      else
                                                        []
                                                      end
