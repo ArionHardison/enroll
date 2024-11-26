@@ -747,6 +747,118 @@ RSpec.describe VerificationHelper, :type => :helper do
       expect { helper.show_ssa_dhs_response(person, record) }.not_to raise_error
     end
   end
+
+  describe '#can_display_type?' do
+    #verif_type needs to be set to either 'alive_status' or 'ai_an_status' in each context
+    let(:verif_type) { double('VerificationType') }
+    let(:current_user) { double('User') }
+
+    before do
+      allow(helper).to receive(:current_user).and_return(current_user)
+    end
+
+    context 'when the current user has an HBX staff role' do
+      it 'returns true' do
+        allow(current_user).to receive(:has_hbx_staff_role?).and_return(true)
+        expect(helper.can_display_type?(verif_type)).to be true
+      end
+    end
+
+    context 'when the verification type is an alive status type and the feature is enabled and it has an outstanding status' do
+      it 'returns true' do
+        allow(current_user).to receive(:has_hbx_staff_role?).and_return(false)
+        allow(helper).to receive(:had_outstanding_status?).with(verif_type).and_return(true)
+        allow(EnrollRegistry).to receive(:feature_enabled?).with(:alive_status).and_return(true)
+        verif_type.stub(:type_name).and_return(VerificationType::ALIVE_STATUS)
+        expect(helper.can_display_type?(verif_type)).to be true
+      end
+    end
+
+    context 'when the verification type is an alive status type and the feature is disabled' do
+      it 'returns true' do
+        allow(current_user).to receive(:has_hbx_staff_role?).and_return(false)
+        allow(helper).to receive(:had_outstanding_status?).with(verif_type).and_return(true)
+        allow(EnrollRegistry).to receive(:feature_enabled?).with(:alive_status).and_return(false)
+        verif_type.stub(:type_name).and_return(VerificationType::ALIVE_STATUS)
+        expect(helper.can_display_type?(verif_type)).to be false
+      end
+    end
+
+    context 'when the verification type is an alive status type and the feature is enabled and it does not have an outstanding status' do
+      it 'returns true' do
+        allow(current_user).to receive(:has_hbx_staff_role?).and_return(false)
+        allow(helper).to receive(:had_outstanding_status?).with(verif_type).and_return(false)
+        allow(EnrollRegistry).to receive(:feature_enabled?).with(:alive_status).and_return(false)
+        verif_type.stub(:type_name).and_return(VerificationType::ALIVE_STATUS)
+        expect(helper.can_display_type?(verif_type)).to be false
+      end
+    end
+
+    context 'when the verification type is an AI/AN status type and the feature is enabled' do
+      it 'returns false' do
+        allow(current_user).to receive(:has_hbx_staff_role?).and_return(false)
+        allow(helper).to receive(:had_outstanding_status?).with(verif_type).and_return(false)
+        allow(EnrollRegistry).to receive(:feature_enabled?).with(:ai_an_self_attestation).and_return(true)
+        verif_type.stub(:type_name).and_return(VerificationType::AMERICAN_INDIAN_STATUS)
+        expect(helper.can_display_type?(verif_type)).to be false
+      end
+    end
+
+    context 'when the verification type is an AI/AN status type and the feature is disabled' do
+      it 'returns true' do
+        allow(current_user).to receive(:has_hbx_staff_role?).and_return(false)
+        allow(helper).to receive(:had_outstanding_status?).with(verif_type).and_return(false)
+        allow(EnrollRegistry).to receive(:feature_enabled?).with(:ai_an_self_attestation).and_return(false)
+        verif_type.stub(:type_name).and_return(VerificationType::AMERICAN_INDIAN_STATUS)
+        expect(helper.can_display_type?(verif_type)).to be true
+      end
+    end
+
+    context 'when none of the conditions are met' do
+      it 'returns true' do
+        allow(current_user).to receive(:has_hbx_staff_role?).and_return(false)
+        allow(helper).to receive(:had_outstanding_status?).with(verif_type).and_return(false)
+        verif_type.stub(:type_name).and_return(VerificationType::AMERICAN_INDIAN_STATUS)
+        expect(helper.can_display_type?(verif_type)).to be true
+      end
+    end
+  end
+
+  describe '#had_outstanding_status?' do
+    let(:verif_type) { double('VerificationType') }
+
+    it 'returns false when verif_type is nil' do
+      expect(helper.had_outstanding_status?(nil)).to be_falsey
+    end
+
+    it 'returns true when previous states include outstanding' do
+      allow(verif_type).to receive_message_chain(:type_history_elements, :pluck, :flatten, :compact).and_return(['outstanding'])
+      allow(verif_type).to receive(:history_tracks).and_return([])
+      allow(verif_type).to receive(:validation_status).and_return('verified')
+      expect(helper.had_outstanding_status?(verif_type)).to be_truthy
+    end
+
+    it 'returns true when history tracks include outstanding' do
+      allow(verif_type).to receive_message_chain(:type_history_elements, :pluck, :flatten, :compact).and_return(nil)
+      allow(verif_type).to receive_message_chain(:history_tracks, :any?).and_return(true)
+      allow(verif_type).to receive(:validation_status).and_return('verified')
+      expect(helper.had_outstanding_status?(verif_type)).to be_truthy
+    end
+
+    it 'returns true when validation status is outstanding' do
+      allow(verif_type).to receive_message_chain(:type_history_elements, :pluck, :flatten, :compact).and_return(nil)
+      allow(verif_type).to receive_message_chain(:history_tracks, :any?).and_return(false)
+      allow(verif_type).to receive(:validation_status).and_return('outstanding')
+      expect(helper.had_outstanding_status?(verif_type)).to be_truthy
+    end
+
+    it 'returns false when no conditions are met' do
+      allow(verif_type).to receive_message_chain(:type_history_elements, :pluck, :flatten, :compact).and_return(nil)
+      allow(verif_type).to receive_message_chain(:history_tracks, :any?).and_return(false)
+      allow(verif_type).to receive(:validation_status).and_return('verified')
+      expect(helper.had_outstanding_status?(verif_type)).to be_falsey
+    end
+  end
 end
 
 describe "#build_ridp_admin_actions_list" do

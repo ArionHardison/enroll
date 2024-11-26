@@ -2,7 +2,7 @@
 
 class Insured::VerificationDocumentsController < ApplicationController
   include ApplicationHelper
-  include Verifications::AliveStatusHelper
+  include VerificationHelper
 
   before_action :set_current_person
   before_action :find_type, :find_docs_owner, :alive_status_authorization?, only: [:upload]
@@ -67,7 +67,7 @@ class Insured::VerificationDocumentsController < ApplicationController
   end
 
   def alive_status_authorization?
-    return true if can_display_or_modify_type?(@verification_type)
+    return true if can_display_type?(@verification_type)
 
     flash[:error] = "You are not authorized to upload this document"
     redirect_to verification_insured_families_path
@@ -102,7 +102,7 @@ class Insured::VerificationDocumentsController < ApplicationController
 
   def get_document(key)
     document = @person.consumer_role.find_vlp_document_by_key(key)
-    return document if document && can_display_or_modify_type?(document.documentable)
+    return document if document && can_display_type?(document.documentable)
   end
 
   def download_options(document)

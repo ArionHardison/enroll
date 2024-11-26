@@ -22,7 +22,7 @@
         <% v_type_display = display_verification_type_name(v_type) %>
         <% can_show_actions_button = current_user.has_hbx_staff_role? %>
         <% badge_col_class = can_show_actions_button ? "5" : "4" %>
-        <% if can_display_or_modify_type?(verif_type) %>
+        <% if can_display_type?(verif_type) %>
           <div class="my-3">
             <div class="row mb-2 mx-0 p-0">
               <div class="d-flex col-xl-7 px-0 pb-2 pb-xl-0 align-items-center">
@@ -135,7 +135,7 @@
               <% end %>
               <% verification_filter.each do |verif_type| %>
                 <% v_type = verif_type.type_name %>
-                <% if can_display_or_modify_type?(verif_type) %>
+                <% if can_display_type?(verif_type) %>
                   <div class="row">
                     <div class="v-type col-md-12">
                       <div class="v-type-name col-md-2">

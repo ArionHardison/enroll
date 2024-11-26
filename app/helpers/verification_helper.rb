@@ -50,19 +50,32 @@ module VerificationHelper
     end
   end
 
-  # method added specifically to handle the displaying of 'Alive Status'
-  # this verification type should always be visible to admin
-  # but should only display for consumers/brokers/broker agency staff if the validation_status is 'outstanding'
+  # @!method had_outstanding_status?(verif_type)
+  # Searches for the verification type change history in the verification type, either in the type_history_elements or history_tracks.
+  # If the verification type has ever been in 'outstanding' status, whether historically or currently, it will return true.
+  # @param verif_type [Object] The verification type object to check.
+  # @return [Boolean] Returns true if the verification type has ever been in 'outstanding' status, false otherwise.
+  def had_outstanding_status?(verif_type)
+    previous_states = fetch_previous_states(verif_type)
+    previous_states_history = has_outstanding_history?(verif_type, previous_states)
+    outstanding_status?(previous_states, previous_states_history, verif_type)
+  end
+
+  # Determines if a verification type can be displayed based on the user's role, verification type status, and feature settings.
+  #
+  # @param verif_type [Object, nil] The verification type object to check. Can be nil.
+  # @return [Boolean] Returns true if the verification type should be displayed, false otherwise.
   def can_display_type?(verif_type)
-    return true unless verif_type.type_name == 'Alive Status'
-    return false unless EnrollRegistry.feature_enabled?(:enable_alive_status)
     return true if current_user.has_hbx_staff_role?
 
-    previous_states = verif_type.type_history_elements.pluck(:from_validation_status).compact
-    return true if previous_states.include?('outstanding')
-    return true if verif_type.validation_status == 'outstanding'
-
-    false
+    case verif_type&.type_name
+    when VerificationType::ALIVE_STATUS
+      EnrollRegistry.feature_enabled?(:alive_status) && had_outstanding_status?(verif_type)
+    when VerificationType::AMERICAN_INDIAN_STATUS
+      !EnrollRegistry.feature_enabled?(:ai_an_self_attestation) || had_outstanding_status?(verif_type)
+    else
+      true
+    end
   end
 
   def ridp_status_translated(type, person)
@@ -389,5 +402,20 @@ module VerificationHelper
 
   def ridp_type_unverified?(ridp_type, person)
     ridp_type_status(ridp_type, person) != 'valid'
+  end
+
+  private
+
+  def fetch_previous_states(verif_type)
+    verif_type&.type_history_elements&.pluck(:from_validation_status, :to_validation_status)&.flatten&.compact
+  end
+
+  def has_outstanding_history?(verif_type, previous_states)
+    return false unless previous_states.blank?
+    verif_type&.history_tracks&.any? { |ht| ht.modified["validation_status"] == 'outstanding' }
+  end
+
+  def outstanding_status?(previous_states, previous_states_history, verif_type)
+    previous_states&.include?('outstanding') || previous_states_history || verif_type&.validation_status == 'outstanding'
   end
 end

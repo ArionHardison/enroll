@@ -1248,6 +1248,44 @@ When(/.+ visits home page/) do
   visit "/families/home"
 end
 
+Then(/^.+ should (.*) an American Indian or Alaska Native status$/) do |is_outstanding|
+  if is_outstanding == 'not see'
+    expect(page).not_to have_content(VerificationType::AMERICAN_INDIAN_STATUS)
+  else
+    expect(page).to have_content(VerificationType::AMERICAN_INDIAN_STATUS)
+  end
+end
+
+Given(/^the ai_an_self_attestation feature is enabled$/) do
+  allow(EnrollRegistry[:ai_an_self_attestation].feature).to receive(:is_enabled).and_return(true)
+end
+
+Given(/^the ai_an_self_attestation feature is disabled$/) do
+  allow(EnrollRegistry[:ai_an_self_attestation].feature).to receive(:is_enabled).and_return(false)
+end
+
+Given(/^the consumer is (.*) user with (.*) American Indian or Alaska Native status$/) do |existing, status|
+  validation_type = case existing
+                    when 'existing'
+                      if status == 'outstanding'
+                        'outstanding'
+                      else
+                        'negative response recieved'
+                      end
+                    when 'new'
+                      if status == 'attested'
+                        'attested'
+                      else
+                        'negative response recieved'
+                      end
+                    end
+
+  @consumer.person.update_attributes!(tribal_id: '123456789')
+  @consumer.person.verification_types.last.update_attributes!(validation_status: validation_type)
+  sleep 2
+  visit current_path
+end
+
 When(/^\w+ checks? the Insured portal open enrollment dates$/) do
   current_day = TimeKeeper.date_of_record
   if (Date.new(current_day.year - 1, 11, 1)..Date.new(current_day.year, 1, 31)).include?(current_day)

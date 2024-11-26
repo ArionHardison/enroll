@@ -6,10 +6,8 @@ class Insured::FamiliesController < FamiliesController
   include Insured::FamiliesHelper
 
   layout :resolve_layout
-  if EnrollRegistry.feature_enabled?(:bs4_consumer_flow)
-    before_action :enable_bs4_layout, only: [:home, :find_sep, :record_sep, :check_qle_date, :check_move_reason, :check_marriage_reason,
-                                             :check_insurance_reason, :verification, :personal, :inbox, :manage_family, :brokers, :enrollment_history]
-  end
+  before_action :enable_bs4_layout, only: [:home, :find_sep, :record_sep, :check_qle_date, :check_move_reason, :check_marriage_reason,
+                                           :check_insurance_reason, :verification, :personal, :inbox, :manage_family, :brokers, :enrollment_history]
   before_action :updateable?, only: [:delete_consumer_broker, :record_sep, :purchase, :upload_notice]
   before_action :init_qualifying_life_events, only: [:home, :manage_family, :find_sep]
   before_action :check_for_address_info, only: [:find_sep, :home]
@@ -684,6 +682,6 @@ class Insured::FamiliesController < FamiliesController
   end
 
   def enable_bs4_layout
-    @bs4 = conditionally_bs4_enabled_actions.include?(action_name) ? params[:bs4] == "true" : true
+    @bs4 = conditionally_bs4_enabled_actions.include?(action_name) ? params[:bs4] == "true" : true if EnrollRegistry.feature_enabled?(:bs4_consumer_flow)
   end
 end
