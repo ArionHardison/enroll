@@ -3,7 +3,7 @@
 require 'rails_helper'
 
 describe Queries::BrokerAgencyDatatableQuery, dbclean: :after_each do
-  subject { Queries::BrokerAgencyDatatableQuery.new({}) }
+  subject { Queries::BrokerAgencyDatatableQuery.new({}, data_store: Effective::Datatables::DataStores::FamilyCountDataStore) }
 
   context "default query" do
     it "builds scope with selector for brokers" do
@@ -21,7 +21,7 @@ describe Queries::BrokerAgencyDatatableQuery, dbclean: :after_each do
     end
   end
 
-  context "performs search" do
+  context "search" do
     shared_examples "builds scope with selector for search query" do |broker_name_search_flag_enabled:|
       before do
         subject.instance_variable_set(:@search_string, search_query)
@@ -59,10 +59,10 @@ describe Queries::BrokerAgencyDatatableQuery, dbclean: :after_each do
     it_behaves_like "builds scope with selector for search query", broker_name_search_flag_enabled: false
   end
 
-  context "performs order" do
-    shared_examples "ordering by legal name" do |order|
-      def create_organization(legal_name)
-        FactoryBot.create(
+  context "order" do
+    shared_examples "by field" do |field, order|
+      def create_organization(legal_name, family_count)
+        org = FactoryBot.create(
           :benefit_sponsors_organizations_general_organization,
           :with_broker_agency_profile,
           legal_name: legal_name,
@@ -73,23 +73,46 @@ describe Queries::BrokerAgencyDatatableQuery, dbclean: :after_each do
             site_key: ::EnrollRegistry[:enroll_app].settings(:site_key).item
           )
         )
+
+        (0...family_count).each do
+          family = FactoryBot.create(:family, :with_primary_family_member, person: FactoryBot.create(:person))
+          family.broker_agency_accounts.create!(benefit_sponsors_broker_agency_profile_id: org.broker_agency_profile.id, start_on: TimeKeeper.date_of_record, is_active: true)
+        end
+
+        org
       end
 
-      let!(:organization_1) { create_organization("A") }
-      let!(:organization_2) { create_organization("B") }
-      let!(:organization_3) { create_organization("C") }
+      let!(:organization_0) { create_organization("A", 0) }
+      let!(:organization_1) { create_organization("B", 1) }
+      let!(:organization_2) { create_organization("C", 2) }
+      let!(:organization_3) { create_organization("D", 3) }
 
-      before { subject.instance_variable_set(:@order_by, {"legal_name" => order}) }
+      before do
+        allow(EnrollRegistry).to receive(:feature_enabled?).with(:broker_family_count).and_return(true)
+        Effective::Datatables::DataStores::FamilyCountDataStore.setup # setup the cache after the Families have been created
+        subject.order_by({field => order})
+      end
 
-      it "builds query with #{order == :asc ? 'ascending' : 'descending'} order by legal name" do
-        expected_order = [organization_1, organization_2, organization_3]
+      it "builds query with #{order == :asc ? 'ascending' : 'descending'} order by #{field}" do
+        expected_order = [organization_0, organization_1, organization_2, organization_3]
         expected_order.reverse! if order == :desc
-        expect(subject.build_query.options[:sort]).to eq({"legal_name" => order == :asc ? 1 : -1})
-        expect(subject.build_query.to_a).to eq(expected_order)
+        query = subject.build_query
+        if field == "legal_name"
+          expect(query.class).to eq(Mongoid::Criteria)
+          expect(query.options[:sort]).to eq({field.to_s => order == :asc ? 1 : -1})
+        else
+          expect(query.class).to eq(Array)
+        end
+        expect(query.to_a).to eq(expected_order)
       end
     end
 
-    it_behaves_like "ordering by legal name", :asc
-    it_behaves_like "ordering by legal name", :desc
+    %w[legal_name active_families_count].each do |field|
+      context "by #{field}" do
+        %i[asc desc].each do |order|
+          it_behaves_like "by field", field, order
+        end
+      end
+    end
   end
 end

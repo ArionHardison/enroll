@@ -151,6 +151,7 @@ module Effective
       @search_terms = nil
       @order_name = nil
       @order_direction = nil
+      self.class.const_get(:DATA_STORE).setup unless view&.request&.xhr? == true || !self.class.const_defined?(:DATA_STORE)
     end
 
     def view_context

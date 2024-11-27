@@ -1,7 +1,7 @@
 module Effective
   module Datatables
     class BrokerAgencyDatatable < Effective::MongoidDatatable
-
+      DATA_STORE = Effective::Datatables::DataStores::FamilyCountDataStore # data store for broker family count
 
       datatable do
         # bulk_actions_column do
@@ -20,6 +20,7 @@ module Effective
           h(row.dba)
         }, :sortable => false, :filter => false, :width => '30%'
         table_column :fein, :label => l10n('fein'), :proc => proc { |row| row.fein }, :sortable => false, :filter => false, :width => '10%'
+        table_column(:active_families_count, :label => l10n('count'), :proc => proc { |row| DATA_STORE.fetch_field(row) }, :sortable => true, :filter => false, :width => '10%') if EnrollRegistry.feature_enabled?(:broker_family_count)
 
         table_column :entity_kind, :label => l10n('entity_kind'), :proc => proc { |row| row.entity_kind.to_s.titleize }, :sortable => false, :filter => false, :width => '10%'
         table_column :market_kind, :label => l10n('market'), :proc => proc { |row| row.broker_agency_profile.market_kind.to_s.titleize }, :sortable => false, :filter => false, :width => '10%'
@@ -28,7 +29,7 @@ module Effective
       end
 
       def collection
-        @collection ||= Queries::BrokerAgencyDatatableQuery.new(attributes)
+        @collection ||= Queries::BrokerAgencyDatatableQuery.new(attributes, data_store: DATA_STORE)
       end
 
       def global_search?

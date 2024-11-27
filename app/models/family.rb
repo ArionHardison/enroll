@@ -114,7 +114,7 @@ class Family
 
   index({"family_members.person_id" => 1, hbx_assigned_id: 1})
 
-  index({"broker_agency_accounts.broker_agency_profile_id" => 1, "broker_agency_accounts.is_active" => 1}, {name: "broker_families_search_index"})
+  index({"broker_agency_accounts.benefit_sponsors_broker_agency_profile_id" => 1, "broker_agency_accounts.is_active" => 1}, {name: "broker_families_search_index"})
 
   index({'eligibility_determination.outstanding_verification_status': 1,
          'eligibility_determination.outstanding_verification_earliest_due_date': 1},
@@ -1248,6 +1248,25 @@ class Family
         { :$sort => { 'eligibility_determination.outstanding_verification_earliest_due_date': sort_direction } }
       ]
     end
+
+    def broker_agency_profile_counts
+      [
+        {"$unwind" => "$broker_agency_accounts"},
+        {"$match" => {"broker_agency_accounts.is_active" => true}},
+        {"$group" => {"_id" => "$broker_agency_accounts.benefit_sponsors_broker_agency_profile_id", "count" => {"$sum" => 1}}},
+        {
+          "$lookup" => {
+            "from" => "benefit_sponsors_organizations_organizations",
+            "localField" => "_id",
+            "foreignField" => "profiles._id",
+            "as" => "organization"
+          }
+        },
+        {"$unwind" => "$organization"},
+        {"$project" => {"_id" => "$organization._id", "count" => 1}}
+      ]
+    end
+
   end
 
   def build_consumer_role(family_member, opts = {})
