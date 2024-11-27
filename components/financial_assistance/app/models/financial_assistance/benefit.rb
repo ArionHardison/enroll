@@ -105,7 +105,7 @@ module FinancialAssistance
     scope :eligible, -> { where(kind: 'is_eligible')}
     scope :enrolled, -> { where(kind: 'is_enrolled')}
     scope :of_insurance_kind, ->(insurance_kind) { where(insurance_kind: insurance_kind) }
-    scope :has_valid_insurance_kind, -> { where(:insurance_kind.in => valid_insurance_kinds) }
+    scope :has_valid_insurance_kind, -> { where(:insurance_kind.in => valid_insurance_kinds(include_chip: true)) }
 
     scope :any_medicare, -> { where(:insurance_kind.in => ['medicare', 'medicare_advantage', 'medicare_part_b']) }
 
@@ -168,12 +168,12 @@ module FinancialAssistance
       # rubocop:disable Metrics/CyclomaticComplexity
       # rubocop:disable Metrics/PerceivedComplexity
       # rubocop:disable Metrics/AbcSize
-      def valid_insurance_kinds
+      def valid_insurance_kinds(include_chip: false)
         i_kinds = []
         i_kinds << "private_individual_and_family_coverage" if FinancialAssistanceRegistry.feature_enabled?(:private_individual_and_family_coverage)
         i_kinds << "acf_refugee_medical_assistance" if FinancialAssistanceRegistry.feature_enabled?(:acf_refugee_medical_assistance)
         i_kinds << "americorps_health_benefits" if FinancialAssistanceRegistry.feature_enabled?(:americorps_health_benefits)
-        i_kinds << "child_health_insurance_plan" if FinancialAssistanceRegistry.feature_enabled?(:child_health_insurance_plan)
+        i_kinds << "child_health_insurance_plan" if FinancialAssistanceRegistry.feature_enabled?(:child_health_insurance_plan) && (include_chip || !FinancialAssistanceRegistry.feature_enabled?(:remove_cubcare_references))
         i_kinds << "medicaid" if FinancialAssistanceRegistry.feature_enabled?(:medicaid)
         i_kinds << "medicare" if FinancialAssistanceRegistry.feature_enabled?(:medicare)
         i_kinds << "medicare_advantage" if FinancialAssistanceRegistry.feature_enabled?(:medicare_advantage)
@@ -208,6 +208,7 @@ module FinancialAssistance
     def duplicate_instance(new_applicant)
       benefit_params = self.attributes.slice(:title, :esi_covered, :kind, :insurance_kind, :hra_type, :is_employer_sponsored, :is_esi_waiting_period, :health_plan_meets_mvs_and_affordable,
                                              :is_esi_mec_met, :employee_cost, :employee_cost_frequency, :start_on, :end_on, :employer_name, :employer_id)
+      benefit_params[:insurance_kind] = "medicaid" if benefit_params[:insurance_kind] == "child_health_insurance_plan" && FinancialAssistanceRegistry.feature_enabled?(:remove_cubcare_references)
       new_benefit = new_applicant.benefits.build(benefit_params)
       build_new_employer_address(new_benefit) if employer_address.present?
       build_new_employer_phone(new_benefit) if employer_phone.present?

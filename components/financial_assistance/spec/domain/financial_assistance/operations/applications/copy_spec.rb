@@ -784,6 +784,15 @@ RSpec.describe FinancialAssistance::Operations::Applications::Copy, type: :model
       applicant.save!
     end
 
+    let!(:create_chip_benefit) do
+      benefit = ::FinancialAssistance::Benefit.new({ kind: 'is_enrolled',
+                                                     insurance_kind: 'child_health_insurance_plan',
+                                                     start_on: Date.today.prev_year,
+                                                     end_on: TimeKeeper.date_of_record.prev_month})
+      applicant.benefits << benefit
+      applicant.save!
+    end
+
     let!(:deduction) do
       deduction = ::FinancialAssistance::Deduction.new({ kind: 'deductable_part_of_self_employment_taxes',
                                                          amount: 100.00,
@@ -794,6 +803,7 @@ RSpec.describe FinancialAssistance::Operations::Applications::Copy, type: :model
     end
 
     before do
+      allow(FinancialAssistanceRegistry).to receive(:feature_enabled?).with(:remove_cubcare_references).and_return(true)
       @new_application = subject.call(application_id: application.id).success
       @new_applicant = @new_application.applicants.first
       @ssi_income = @new_applicant.incomes.detect { |inc| inc.kind == "social_security_benefit" }
@@ -860,6 +870,13 @@ RSpec.describe FinancialAssistance::Operations::Applications::Copy, type: :model
 
       it 'should create employer_phone with created_at' do
         expect(@new_applicant.benefits.first.employer_phone.created_at).not_to be_nil
+      end
+    end
+
+    context 'chip benefits should be copied as medicaid' do
+      it 'should create medicaid benefit for applicant' do
+        expect(@new_applicant.benefits.last.insurance_kind).not_to eq 'child_health_insurance_plan'
+        expect(@new_applicant.benefits.last.insurance_kind).to eq 'medicaid'
       end
     end
 

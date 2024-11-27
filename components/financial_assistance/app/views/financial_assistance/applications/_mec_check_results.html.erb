@@ -6,7 +6,7 @@
 %>
 <% if @bs4 %>
   <p>
-    <b><%= l10n("faa.mc_success_existing", medicaid_agency_phone: link_to(medicaid_agency_phone, "tel:#{medicaid_agency_phone}", target: '_blank')) %></b>
+    <b><%= l10n(FinancialAssistanceRegistry.feature_enabled?(:remove_cubcare_references) ? 'faa.mc_success_existing_no_cubcare' : 'faa.mc_success_existing', medicaid_agency_phone: link_to(medicaid_agency_phone, "tel:#{medicaid_agency_phone}", target: '_blank')) %></b>
     <%= l10n("faa.mc_success_enroll", medicaid_agency_url: link_to(medicaid_short_url, medicaid_agency_url, target: '_blank'), medicaid_agency_phone: medicaid_agency_phone, medicaid_agency_phone_ttd: medicaid_agency_phone_ttd) %>
   </p>
   <p>
@@ -19,7 +19,7 @@
     <div class="er-success bg-success">
         <div class="text-success pl-1 pr-1">
             <p>
-              <b><%= l10n("faa.mc_success_existing", medicaid_agency_phone: link_to(medicaid_agency_phone, "tel:#{medicaid_agency_phone}", target: '_blank', rel: 'noopener noreferrer')) %></b>
+              <b><%= l10n(FinancialAssistanceRegistry.feature_enabled?(:remove_cubcare_references) ? 'faa.mc_success_existing_no_cubcare' : 'faa.mc_success_existing', medicaid_agency_phone: link_to(medicaid_agency_phone, "tel:#{medicaid_agency_phone}", target: '_blank', rel: 'noopener noreferrer')) %></b>
               <%= l10n("faa.mc_success_enroll", medicaid_agency_url: link_to(medicaid_short_url, medicaid_agency_url, target: '_blank', rel: 'noopener noreferrer'), medicaid_agency_phone: medicaid_agency_phone, medicaid_agency_phone_ttd: medicaid_agency_phone_ttd) %>
             </p>
             <p>

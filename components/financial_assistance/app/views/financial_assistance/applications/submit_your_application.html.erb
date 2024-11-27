@@ -26,7 +26,7 @@
     </div>
 
     <div class="my-4">
-      <p><%= l10n('faa.i_understand_evaluation_1')%><%= l10n('faa.i_understand_evaluation_2')%><%= l10n('faa.i_understand_evaluation_3')%></p>
+      <p><%= l10n(FinancialAssistanceRegistry.feature_enabled?(:remove_cubcare_references) ? 'faa.i_understand_evaluation_1_no_cubcare' : 'faa.i_understand_evaluation_1')%><%= l10n(FinancialAssistanceRegistry.feature_enabled?(:remove_cubcare_references) ? 'faa.i_understand_evaluation_2_no_cubcare' : 'faa.i_understand_evaluation_2')%><%= l10n('faa.i_understand_evaluation_3')%></p>
       <p><%= l10n('faa.anyone_found_eligible_1') %> <%= l10n('faa.anyone_found_eligible_2') %></p>
       <p><%= l10n('faa.anyone_found_eligible_3') %></p>
       <%= f.label :medicaid_insurance_collection_terms do %>

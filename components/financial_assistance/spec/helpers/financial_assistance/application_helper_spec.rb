@@ -492,4 +492,15 @@ RSpec.describe ::FinancialAssistance::ApplicationHelper, :type => :helper, dbcle
       end
     end
   end
+
+  describe 'sanitize_insurance_kind' do
+    before do
+      allow(FinancialAssistanceRegistry).to receive(:feature_enabled?).with(:remove_cubcare_references).and_return(true)
+    end
+
+    it 'should return medicaid when the insurance_kind is chip' do
+      expect(helper.sanitize_insurance_kind('child_health_insurance_plan').downcase).to include('medicaid')
+      expect(helper.sanitize_insurance_kind('child_health_insurance_plan').downcase).not_to include('child_health_insurance_plan')
+    end
+  end
 end

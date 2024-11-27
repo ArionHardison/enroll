@@ -116,7 +116,7 @@
     <% if FinancialAssistanceRegistry.feature_enabled?(:has_medicare_cubcare_eligible) %>
       <div id="has_eligible_medicaid_cubcare_question" class="pb-4 driver-question">
         <fieldset>
-          <legend class="instruction-row weight-n required"><%= l10n("faa.medicaid_not_eligible") %></legend>
+          <legend class="instruction-row weight-n required"><%= l10n(FinancialAssistanceRegistry.feature_enabled?(:remove_cubcare_references) ? 'faa.medicaid_not_eligible_no_cubcare' : 'faa.medicaid_not_eligible') %></legend>
           <div class="focus d-flex mt-3 instruction-row">
             <label class="radio mr-3" for="has_eligible_medicaid_cubcare_true">
               <input id="has_eligible_medicaid_cubcare_true" type="radio" value="true" name="has_eligible_medicaid_cubcare" <%='checked' if @applicant.has_eligible_medicaid_cubcare == true %>>

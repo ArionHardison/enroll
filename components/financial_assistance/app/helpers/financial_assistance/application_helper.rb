@@ -240,9 +240,9 @@ module FinancialAssistance
 
     def applicant_currently_enrolled_key
       if FinancialAssistanceRegistry[:has_enrolled_health_coverage].setting(:currently_enrolled).item
-        'has_enrolled_health_coverage'
+        FinancialAssistanceRegistry.feature_enabled?(:remove_cubcare_references) ? 'has_enrolled_health_coverage_no_cubcare' : 'has_enrolled_health_coverage'
       elsif FinancialAssistanceRegistry[:has_enrolled_health_coverage].setting(:currently_enrolled_with_hra).item
-        'has_enrolled_health_coverage_from_hra'
+        FinancialAssistanceRegistry.feature_enabled?(:remove_cubcare_references) ? 'has_enrolled_health_coverage_from_hra_no_cubcare' : 'has_enrolled_health_coverage_from_hra'
       else
         ''
       end
@@ -274,9 +274,9 @@ module FinancialAssistance
 
     def applicant_eligibly_enrolled_key
       if FinancialAssistanceRegistry[:has_eligible_health_coverage].setting(:currently_eligible).item
-        'has_eligible_health_coverage'
+        FinancialAssistanceRegistry.feature_enabled?(:remove_cubcare_references) ? 'has_eligible_health_coverage_no_cubcare' : 'has_eligible_health_coverage'
       elsif FinancialAssistanceRegistry[:has_eligible_health_coverage].setting(:currently_eligible_with_hra).item
-        'has_eligible_health_coverage_from_hra'
+        FinancialAssistanceRegistry.feature_enabled?(:remove_cubcare_references) ? 'has_eligible_health_coverage_from_hra_no_cubcare' : 'has_eligible_health_coverage_from_hra'
       else
         ''
       end
@@ -471,9 +471,17 @@ module FinancialAssistance
     end
 
     def insurance_kind_select_options(kind)
-      FinancialAssistance::Benefit.valid_insurance_kinds.map do |insurance_kind|
+      FinancialAssistance::Benefit.valid_insurance_kinds(include_chip: false).map do |insurance_kind|
         [hr_kind(kind, insurance_kind), insurance_kind, {:'data-esi' => display_esi_fields?(insurance_kind, kind), :'data-mvsq' => display_minimum_value_standard_question?(insurance_kind)}]
       end
+    end
+
+    def medicaid_or_chip_program_short_name_key
+      FinancialAssistanceRegistry.feature_enabled?(:remove_cubcare_references) ? :medicaid_or_chip_program_short_name_no_cubcare : :medicaid_or_chip_program_short_name
+    end
+
+    def sanitize_insurance_kind(insurance_kind)
+      insurance_kind == "child_health_insurance_plan" && FinancialAssistanceRegistry.feature_enabled?(:remove_cubcare_references) ? "medicaid" : insurance_kind
     end
   end
 end

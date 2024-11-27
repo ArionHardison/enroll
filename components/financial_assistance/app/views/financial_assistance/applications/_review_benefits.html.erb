@@ -1,4 +1,4 @@
-<% insurance_kinds = FinancialAssistance::Benefit.valid_insurance_kinds %>
+<% insurance_kinds = FinancialAssistance::Benefit.valid_insurance_kinds(include_chip: true) %>
 <% insurance_kinds.each do |insurance_kind| %>
   <% benefits = applicant.benefits.where(kind: kind).of_insurance_kind(insurance_kind) %>
   <% if benefits.present? %>

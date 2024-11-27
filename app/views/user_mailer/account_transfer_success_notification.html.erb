@@ -2,7 +2,7 @@
 <%= l10n(
     "user_mailer.account_transfer_success_notification.full_text",
     medicaid_or_chip_agency_long_name: EnrollRegistry[:medicaid_or_chip_agency_long_name].settings(:name).item,
-    medicaid_or_chip_program_short_name: EnrollRegistry[:medicaid_or_chip_program_short_name].settings(:name).item,
+    medicaid_or_chip_program_short_name: EnrollRegistry[FinancialAssistanceRegistry.feature_enabled?(:remove_cubcare_references) ? :medicaid_or_chip_program_short_name_no_cubcare : :medicaid_or_chip_program_short_name].settings(:name).item,
     person_name: person_name,
     site_home_business_url: site_main_web_address_url,
     state_name: state_name,

@@ -73,23 +73,23 @@
       <!-- Start: Section for Magi Medicaid / Medicaid CHIP Applicants -->
       <% medicaid_or_chip_applicants = ed.medicaid_or_chip_applicants %>
       <% if medicaid_or_chip_applicants.present? %>
-        <h3 data-cuke='medicaid_or_chip_heading'><%= l10n("faa.results.medicaid_or_chip_heading", medicaid_or_chip_program_short_name: FinancialAssistanceRegistry[:medicaid_or_chip_program_short_name].setting(:name).item&.gsub(" or Cub Care", "")) %></h3>
+        <h3 data-cuke='medicaid_or_chip_heading'><%= l10n("faa.results.medicaid_or_chip_heading", medicaid_or_chip_program_short_name: FinancialAssistanceRegistry[medicaid_or_chip_program_short_name_key].setting(:name).item&.gsub(" or Cub Care", "")) %></h3>
         <p data-cuke='medicaid_or_chip_text'><%= l10n("faa.results.medicaid_or_chip_text",
                                                       medicaid_long_name: FinancialAssistanceRegistry[:medicaid_or_chip_program_long_name].setting(:name).item,
-                                                      medicaid_short_name: FinancialAssistanceRegistry[:medicaid_or_chip_program_short_name].setting(:name).item&.gsub(" or Cub Care", ""),
+                                                      medicaid_short_name: FinancialAssistanceRegistry[medicaid_or_chip_program_short_name_key].setting(:name).item&.gsub(" or Cub Care", ""),
                                                       state_medicaid_agency_long_name: FinancialAssistanceRegistry[:medicaid_or_chip_agency_long_name].setting(:name).item,
                                                       medicaid_agency_phone: EnrollRegistry[:enroll_app].setting(:medicaid_agency_phone).item,
                                                       medicaid_agency_phone_ttd: EnrollRegistry[:enroll_app].setting(:contact_center_tty_number).item) %>
         </p>
         <p>
-          <%= l10n("faa.results.medicaid_or_chip_text2a", medicaid_short_name: FinancialAssistanceRegistry[:medicaid_or_chip_program_short_name].setting(:name).item&.gsub(" or Cub Care", ""), short_name: EnrollRegistry[:enroll_app].setting(:short_name).item) %>
-          <b><%= l10n("faa.results.medicaid_or_chip_text2b", medicaid_short_name: FinancialAssistanceRegistry[:medicaid_or_chip_program_short_name].setting(:name).item&.gsub(" or Cub Care", "")) %></b><%= l10n("faa.results.medicaid_or_chip_text2c",
-                    medicaid_short_name: FinancialAssistanceRegistry[:medicaid_or_chip_program_short_name].setting(:name).item&.gsub(" or Cub Care", ""),
+          <%= l10n("faa.results.medicaid_or_chip_text2a", medicaid_short_name: FinancialAssistanceRegistry[medicaid_or_chip_program_short_name_key].setting(:name).item&.gsub(" or Cub Care", ""), short_name: EnrollRegistry[:enroll_app].setting(:short_name).item) %>
+          <b><%= l10n("faa.results.medicaid_or_chip_text2b", medicaid_short_name: FinancialAssistanceRegistry[medicaid_or_chip_program_short_name_key].setting(:name).item&.gsub(" or Cub Care", "")) %></b><%= l10n("faa.results.medicaid_or_chip_text2c",
+                    medicaid_short_name: FinancialAssistanceRegistry[medicaid_or_chip_program_short_name_key].setting(:name).item&.gsub(" or Cub Care", ""),
                     medicaid_agency_phone: EnrollRegistry[:enroll_app].setting(:contact_center_short_number).item,
                     contact_center_tty_number: EnrollRegistry[:enroll_app].setting(:contact_center_tty_number).item,
                     short_name: EnrollRegistry[:enroll_app].setting(:short_name).item) %>
-          <b><%= l10n("faa.results.medicaid_or_chip_text2d", medicaid_short_name: FinancialAssistanceRegistry[:medicaid_or_chip_program_short_name].setting(:name).item&.gsub(" or Cub Care", "")) %></b><%= l10n("faa.results.medicaid_or_chip_text2e",
-                    medicaid_short_name: FinancialAssistanceRegistry[:medicaid_or_chip_program_short_name].setting(:name).item&.gsub(" or Cub Care", ""),
+          <b><%= l10n("faa.results.medicaid_or_chip_text2d", medicaid_short_name: FinancialAssistanceRegistry[medicaid_or_chip_program_short_name_key].setting(:name).item&.gsub(" or Cub Care", "")) %></b><%= l10n("faa.results.medicaid_or_chip_text2e",
+                    medicaid_short_name: FinancialAssistanceRegistry[medicaid_or_chip_program_short_name_key].setting(:name).item&.gsub(" or Cub Care", ""),
                     medicaid_agency_phone: EnrollRegistry[:enroll_app].setting(:contact_center_short_number).item,
                     contact_center_tty_number: EnrollRegistry[:enroll_app].setting(:contact_center_tty_number).item,
                     short_name: EnrollRegistry[:enroll_app].setting(:short_name).item) %>
@@ -120,7 +120,7 @@
       <% if ineligible_applicants.present? %>
         <h3 data-cuke='totally_ineligible_heading'><%= l10n("faa.results.totally_ineligible_heading") %></h3>
         <p data-cuke='totally_ineligible_text'><%= l10n("faa.results.totally_ineligible_text",
-                                                        medicaid_or_chip_program_short_name: FinancialAssistanceRegistry[:medicaid_or_chip_program_short_name].setting(:name).item,
+                                                        medicaid_or_chip_program_short_name: FinancialAssistanceRegistry[medicaid_or_chip_program_short_name_key].setting(:name).item,
                                                         short_name: EnrollRegistry[:enroll_app].setting(:short_name).item) %></p>
         <ul>
           <% ineligible_applicants.each do |applicant| %>
@@ -138,11 +138,11 @@
         <p data-cuke='non_magi_referral_text'>
           <%= l10n("faa.results.non_magi_referral_text",
           medicaid_long_name: FinancialAssistanceRegistry[:medicaid_or_chip_program_long_name].setting(:name).item&.gsub(" or Cub Care", ""),
-          medicaid_short_name: FinancialAssistanceRegistry[:medicaid_or_chip_program_short_name].setting(:name).item&.gsub(" or Cub Care", ""),
+          medicaid_short_name: FinancialAssistanceRegistry[medicaid_or_chip_program_short_name_key].setting(:name).item&.gsub(" or Cub Care", ""),
           medicaid_or_chip_agency_long_name: EnrollRegistry[:medicaid_or_chip_agency_long_name].settings(:name).item,
           short_name: EnrollRegistry[:enroll_app].setting(:short_name).item) %>
           <b><%= l10n("faa.results.non_magi_referral_text2",
-          medicaid_short_name: FinancialAssistanceRegistry[:medicaid_or_chip_program_short_name].setting(:name).item&.gsub(" or Cub Care", "")) %></b><%= l10n("faa.results.non_magi_referral_text3",
+          medicaid_short_name: FinancialAssistanceRegistry[medicaid_or_chip_program_short_name_key].setting(:name).item&.gsub(" or Cub Care", "")) %></b><%= l10n("faa.results.non_magi_referral_text3",
           short_name: EnrollRegistry[:enroll_app].setting(:short_name).item) %>
         </p>
         <ul>
@@ -196,7 +196,7 @@
               <div class="w-100 pb-4">
                 <p><%= l10n("faa.full_long_name_determination",
                     program_long_name: FinancialAssistanceRegistry[:medicaid_or_chip_agency_long_name].setting(:name).item,
-                    program_short_name: FinancialAssistanceRegistry[:medicaid_or_chip_program_short_name].setting(:name).item) %></p>
+                    program_short_name: FinancialAssistanceRegistry[medicaid_or_chip_program_short_name_key].setting(:name).item) %></p>
                 <%= h(link_to l10n("faa.send_to_external_verification"), update_transfer_requested_application_url, method: :put, class: "button secondary", id: "btn-request-transfer", remote: true) %>
               </div>
             <% end %>
@@ -289,10 +289,10 @@
             <!-- Start: Section for Magi Medicaid / Medicaid CHIP Applicants -->
             <% medicaid_or_chip_applicants = ed.medicaid_or_chip_applicants %>
             <% if medicaid_or_chip_applicants.present? %>
-              <h5 data-cuke='medicaid_or_chip_heading'><b><%= l10n("faa.results.medicaid_or_chip_heading", medicaid_or_chip_program_short_name: FinancialAssistanceRegistry[:medicaid_or_chip_program_short_name].setting(:name).item) %></b></h5>
+              <h5 data-cuke='medicaid_or_chip_heading'><b><%= l10n("faa.results.medicaid_or_chip_heading", medicaid_or_chip_program_short_name: FinancialAssistanceRegistry[medicaid_or_chip_program_short_name_key].setting(:name).item) %></b></h5>
               <p data-cuke='medicaid_or_chip_text'><%= l10n("faa.results.medicaid_or_chip_text",
                                                             medicaid_or_chip_agency_long_name: FinancialAssistanceRegistry[:medicaid_or_chip_agency_long_name].setting(:name).item,
-                                                            medicaid_or_chip_program_short_name: FinancialAssistanceRegistry[:medicaid_or_chip_program_short_name].setting(:name).item,
+                                                            medicaid_or_chip_program_short_name: FinancialAssistanceRegistry[medicaid_or_chip_program_short_name_key].setting(:name).item,
                                                             medicaid_agency_phone: EnrollRegistry[:enroll_app].setting(:medicaid_agency_phone).item,
                                                             contact_center_tty_number: EnrollRegistry[:enroll_app].setting(:contact_center_tty_number).item
                                                             ) %></p>
@@ -322,7 +322,7 @@
             <% if ineligible_applicants.present? %>
               <h5 data-cuke='totally_ineligible_heading'><b><%= l10n("faa.results.totally_ineligible_heading") %></b></h5>
               <h5 data-cuke='totally_ineligible_text'><%= l10n("faa.results.totally_ineligible_text",
-                                                              medicaid_or_chip_program_short_name: FinancialAssistanceRegistry[:medicaid_or_chip_program_short_name].setting(:name).item,
+                                                              medicaid_or_chip_program_short_name: FinancialAssistanceRegistry[medicaid_or_chip_program_short_name_key].setting(:name).item,
                                                               short_name: EnrollRegistry[:enroll_app].setting(:short_name).item) %></h5>
               <ul>
                 <% ineligible_applicants.each do |applicant| %>
@@ -385,7 +385,7 @@
                   <% if FinancialAssistanceRegistry.feature_enabled?(:fa_send_to_external_verification) && !@application.is_transferrable? %>
                     <%= l10n("faa.full_long_name_determination",
                           program_long_name: FinancialAssistanceRegistry[:medicaid_or_chip_agency_long_name].setting(:name).item,
-                          program_short_name: FinancialAssistanceRegistry[:medicaid_or_chip_program_short_name].setting(:name).item) %>
+                          program_short_name: FinancialAssistanceRegistry[medicaid_or_chip_program_short_name_key].setting(:name).item) %>
                     <br/>
                     <br/>
                     <div>

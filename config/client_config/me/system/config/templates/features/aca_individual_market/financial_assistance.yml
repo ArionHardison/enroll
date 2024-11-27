@@ -143,6 +143,9 @@ registry:
       - key: :avoid_dup_hub_calls_on_applicant_create_or_update
         item: :avoid_dup_hub_calls_on_applicant_create_or_update
         is_enabled: <%= ENV['AVOID_DUP_HUB_CALLS_ON_APPLICANT_CREATE_OR_UPDATE_IS_ENABLED'] || false %>
+      - key: :remove_cubcare_references
+        item: :remove_cubcare_references
+        is_enabled: <%= ENV['REMOVE_CUBCARE_REFERENCES_IS_ENABLED'] || false %>
   - namespace:
     - :request_determination
     features:
@@ -295,6 +298,11 @@ registry:
       settings:
         - key: :name
           item: "MaineCare or Cub Care"
+    - key: :medicaid_or_chip_program_short_name_no_cubcare
+      is_enabled: true
+      settings:
+        - key: :name
+          item: "MaineCare"
     - key: :medicaid_or_chip_program_long_name
       is_enabled: true
       settings:

@@ -226,7 +226,7 @@ health_coverage:
             key: <%= l10n('faa.indian_health_service') %>
             value: "<%= human_boolean(@applicant.health_service_through_referral) %>"
         not_eligible_for_medicaid_cubcare:
-            key: <%= l10n('faa.medicaid_not_eligible') %>
+            key: <%= l10n(FinancialAssistanceRegistry.feature_enabled?(:remove_cubcare_references) ? 'faa.medicaid_not_eligible_no_cubcare' : 'faa.medicaid_not_eligible') %>
             value: "<%= human_boolean(@applicant.has_eligible_medicaid_cubcare) %>"
         medicaid_cubcare_due_on:
             key: <%= l10n('faa.medicaid_cubcare_end_date') %>

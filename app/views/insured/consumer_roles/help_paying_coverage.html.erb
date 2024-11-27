@@ -35,8 +35,10 @@
         <%= l10n('faa.premium_reductions') %>
         <% if EnrollRegistry[:mainecare_cubcare_glossary].enabled? %>
           <%= render partial: 'shared/glossary', locals: {key: 'medicaid', term: 'MaineCare'} %>
-          <%= l10n('faa.premium_reductions2') %>
-          <%= render partial: 'shared/glossary', locals: {key: 'child_health_insurance_plan', term: 'Cub Care'} %>
+          <% unless FinancialAssistanceRegistry.feature_enabled?(:remove_cubcare_references) %>
+            <%= l10n('faa.premium_reductions2') %>
+            <%= render partial: 'shared/glossary', locals: {key: 'child_health_insurance_plan', term: 'Cub Care'} %>
+          <% end %>
           ?
         <% end %>
       </legend>
