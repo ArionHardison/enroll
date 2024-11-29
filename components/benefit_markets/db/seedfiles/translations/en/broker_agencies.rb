@@ -16,6 +16,7 @@ BROKER_AGENCIES_TRANSLATIONS = {
   "en.next" => "Next",
   "en.npn" => "NPN",
   "en.legal_name" => "Legal Name",
+  "en.families_count" => "Families Count",
   "en.fein" => "FEIN",
   "en.primary_broker_name" => "Primary Broker Name",
   "en.broker_agencies.broker_roles.select_this_broker_agency" => "select this broker agency",

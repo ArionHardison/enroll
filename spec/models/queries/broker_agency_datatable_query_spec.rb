@@ -3,7 +3,7 @@
 require 'rails_helper'
 
 describe Queries::BrokerAgencyDatatableQuery, dbclean: :after_each do
-  subject { Queries::BrokerAgencyDatatableQuery.new({}, data_store: Effective::Datatables::DataStores::FamilyCountDataStore) }
+  subject { Queries::BrokerAgencyDatatableQuery.new({}, data_store: Effective::Datatables::DataStores::BrokerFamilyCountDataStore) }
 
   context "default query" do
     it "builds scope with selector for brokers" do
@@ -89,7 +89,7 @@ describe Queries::BrokerAgencyDatatableQuery, dbclean: :after_each do
 
       before do
         allow(EnrollRegistry).to receive(:feature_enabled?).with(:broker_family_count).and_return(true)
-        Effective::Datatables::DataStores::FamilyCountDataStore.setup # setup the cache after the Families have been created
+        Effective::Datatables::DataStores::BrokerFamilyCountDataStore.setup # setup the cache after the Families have been created
         subject.order_by({field => order})
       end
 
