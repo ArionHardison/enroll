@@ -192,11 +192,7 @@ module FinancialAssistance
           us_citizen: nil,
           naturalized_citizen: nil,
           eligible_immigration_status: nil,
-          indian_tribe_member: nil,
           is_incarcerated: nil,
-          tribal_state: nil,
-          tribal_name: nil,
-          tribe_codes: []
         }
 
         fields_to_unset.each do |field, value|

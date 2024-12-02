@@ -705,6 +705,7 @@ RSpec.describe Forms::FamilyMember, dbclean: :after_each, type: :form do
     describe "that is findable using the family_member_id" do
       before(:each) do
         allow(Forms::FamilyMember).to receive(:compare_address_with_primary).and_return false
+        allow(Forms::FamilyMember).to receive(:indian_tribe_member_status).and_return false
         @found_form = Forms::FamilyMember.find(family_member_id)
       end
 

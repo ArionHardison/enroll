@@ -364,7 +364,6 @@ class Insured::FamilyMembersController < ApplicationController
         us_citizen: nil,
         naturalized_citizen: nil,
         eligible_immigration_status: nil,
-        indian_tribe_member: nil,
         is_incarcerated: nil
       }
 

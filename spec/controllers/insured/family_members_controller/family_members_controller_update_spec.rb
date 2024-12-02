@@ -82,6 +82,15 @@ RSpec.describe Insured::FamilyMembersController do
         expect(dependent_consumer_role.is_applying_coverage).to eq false
         expect(dependent_consumer_role.is_incarcerated).to eq nil
       end
+
+      it "should not set tribal state/name to nil" do
+        allow(EnrollRegistry[:indian_alaskan_tribe_details].feature).to receive(:is_enabled).and_return(true)
+        expect(dependent_consumer_role.person.indian_tribe_member).to eq false
+        put :update, params: {id: family_member.id, dependent: dependent_update_properties}
+        person = dependent_consumer_role.person.reload
+        expect(person.tribal_state).to be_present
+        expect(person.tribal_name).to be_present
+      end
     end
   end
 end

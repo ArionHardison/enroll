@@ -302,6 +302,7 @@ module Forms
                 :race => member.race,
                 :ethnicity => member.ethnicity,
                 :language_code => member.language_code,
+                :indian_tribe_member => indian_tribe_member_status(member),
                 :tribal_id => member.tribal_id,
                 :tribal_state => member.tribal_state,
                 :tribal_name => member.tribal_name,
@@ -314,18 +315,24 @@ module Forms
                           { :citizen_status => nil,
                             :naturalized_citizen => nil,
                             :eligible_immigration_status => nil,
-                            :indian_tribe_member => nil,
                             :is_incarcerated => nil}
                         else
                           {:citizen_status => member.citizen_status,
                            :naturalized_citizen => member.naturalized_citizen,
                            :eligible_immigration_status => member.eligible_immigration_status,
-                           :indian_tribe_member => member.indian_tribe_member,
                            :is_incarcerated => member.is_incarcerated}
                         end
 
       params.merge!(consumer_fields)
       params
+    end
+
+    def self.indian_tribe_member_status(member)
+      person = member&.person
+      result = !(person.tribal_id.nil? || person.tribal_id.empty?)
+      result = !(person.tribal_state.nil? || person.tribal_state.empty?) if EnrollRegistry[:indian_alaskan_tribe_details].enabled?
+
+      result
     end
 
     def self.compare_address_with_primary(family_member)

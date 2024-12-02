@@ -134,9 +134,9 @@ RSpec.describe Operations::FinancialAssistance::ParseApplicant, type: :model, db
       context "when member not applying for coverage" do
         let!(:is_applying_coverage) { false }
 
-        it 'should set indian_tribe_member as nil' do
+        it 'should not set indian_tribe_member as nil' do
           result = subject.call({family_member: dependent})
-          expect(result.success[:indian_tribe_member]).to eq nil
+          expect(result.success[:indian_tribe_member]).not_to eq nil
         end
       end
 
