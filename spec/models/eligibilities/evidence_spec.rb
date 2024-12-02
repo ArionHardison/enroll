@@ -843,6 +843,31 @@ RSpec.describe ::Eligibilities::Evidence, type: :model, dbclean: :after_each do
     end
   end
 
+  context "with non applicant verification reason turned on" do
+    before do
+      Object.const_get(:Eligibilities).send(:remove_const, :Evidence) if defined?(::Eligibilities::Evidence)
+      allow(EnrollRegistry).to receive(:feature_enabled?).and_return(false)
+      allow(EnrollRegistry).to receive(:feature_enabled?).with(:non_applicant_verification_reason).and_return(true)
+      load 'app/models/eligibilities/evidence.rb'
+    end
+
+    it "should have non applicant verification reason" do
+      expect(::Eligibilities::Evidence::VERIFY_REASONS).to include("Non-applicant")
+    end
+  end
+
+  context "with non applicant verification reason turned off" do
+    before do
+      Object.const_get(:Eligibilities).send(:remove_const, :Evidence) if defined?(::Eligibilities::Evidence)
+      allow(EnrollRegistry).to receive(:feature_enabled?).and_return(false)
+      load 'app/models/eligibilities/evidence.rb'
+    end
+
+    it "should not have non applicant verification reason" do
+      expect(::Eligibilities::Evidence::VERIFY_REASONS).not_to include("Non-applicant")
+    end
+  end
+
   context "rejection reasons" do
     context "out of income threshold reason enabled" do
       before do

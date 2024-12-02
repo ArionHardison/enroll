@@ -65,6 +65,7 @@ class VlpDocument < Document
 
   # reasons admin can provide when verifying type
   VERIFICATION_REASONS = EnrollRegistry[:verification_reasons].item
+  VERIFICATION_REASONS += EnrollRegistry[:non_applicant_verification_reason].item if EnrollRegistry.feature_enabled?(:non_applicant_verification_reason)
 
   # reasons admin can provide when rejecting verification type. these reasons applied for all verification types
   ALL_TYPES_REJECT_REASONS = ["Illegible", "Incomplete Doc", "Wrong Type", "Wrong Person"]

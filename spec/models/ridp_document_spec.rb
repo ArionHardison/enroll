@@ -19,9 +19,9 @@ RSpec.describe RidpDocument, :type => :model do
   context "verification reasons" do
     if EnrollRegistry[:enroll_app].setting(:site_key).item == :me
       it "should have crm document system as verification reason" do
-        expect(VlpDocument::VERIFICATION_REASONS).to include("Self-Attestation")
-        expect(RidpDocument::VERIFICATION_REASONS).to include("CRM Document Management System")
-        expect(EnrollRegistry[:verification_reasons].item).to include("CRM Document Management System")
+        expect(VlpDocument::VERIFICATION_REASONS).to include("Self-attestation")
+        expect(RidpDocument::VERIFICATION_REASONS).to include("CRM document management system")
+        expect(EnrollRegistry[:verification_reasons].item).to include("CRM document management system")
       end
     end
     if EnrollRegistry[:enroll_app].setting(:site_key).item == :dc
@@ -30,6 +30,33 @@ RSpec.describe RidpDocument, :type => :model do
         expect(RidpDocument::VERIFICATION_REASONS).to include("Salesforce")
         expect(EnrollRegistry[:verification_reasons].item).to include("Salesforce")
       end
+    end
+  end
+
+  # Because the constants are frozen, we need to remove the model and reload the file
+  # after setting the FF in order to test what happens when the feature is enabled
+  context "with non applicant verification reason turned on" do
+    before do
+      Object.send(:remove_const, :RidpDocument) if Module.const_defined?(:RidpDocument)
+      allow(EnrollRegistry).to receive(:feature_enabled?).and_return(false)
+      allow(EnrollRegistry).to receive(:feature_enabled?).with(:non_applicant_verification_reason).and_return(true)
+      load 'app/models/ridp_document.rb'
+    end
+
+    it "should have non applicant verification reason" do
+      expect(RidpDocument::VERIFICATION_REASONS).to include("Non-applicant")
+    end
+  end
+
+  context "with non applicant verification reason turned off" do
+    before do
+      Object.send(:remove_const, :RidpDocument) if Module.const_defined?(:RidpDocument)
+      allow(EnrollRegistry).to receive(:feature_enabled?).and_return(false)
+      load 'app/models/ridp_document.rb'
+    end
+
+    it "should not have non applicant verification reason" do
+      expect(RidpDocument::VERIFICATION_REASONS).not_to include("Non-applicant")
     end
   end
 

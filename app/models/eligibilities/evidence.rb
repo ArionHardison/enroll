@@ -16,6 +16,8 @@ module Eligibilities
     ADMIN_VERIFICATION_ACTIONS = ["Verify", "Reject", "View History", "Call HUB", "Extend"].freeze
 
     VERIFY_REASONS = EnrollRegistry[:verification_reasons].item
+    VERIFY_REASONS += EnrollRegistry[:non_applicant_verification_reason].item if EnrollRegistry.feature_enabled?(:non_applicant_verification_reason)
+
     REJECT_REASONS = ["Illegible", "Incomplete Doc", "Wrong Type", "Wrong Person", "Expired", "Too old"].freeze
     REJECT_REASONS += ["Out of Income Threshold"] if EnrollRegistry.feature_enabled?("out_of_income_threshold_reject_reason")
 
