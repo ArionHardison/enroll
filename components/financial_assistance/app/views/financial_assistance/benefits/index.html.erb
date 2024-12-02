@@ -132,7 +132,7 @@
         <%= render partial: 'financial_assistance/shared/modal_support_text', locals: {key: "has_eligible_medicaid_cubcare"} %>
 
         <fieldset id="denied-medicaid" class="mt-4 instruction-row">
-          <legend class="weight-n instruction-row"><%=l10n("faa.medicaid_cubcare_end_date")%></legend>
+          <legend class="weight-n instruction-row"><%=l10n(FinancialAssistanceRegistry.feature_enabled?(:remove_cubcare_references) ? 'faa.medicaid_cubcare_end_date_no_cubcare' : 'faa.medicaid_cubcare_end_date')%></legend>
           <div class="mr-auto mt-3">
             <label class="required" for="medicaid_cubcare_due_on"><%=l10n("end_date")%></label>
             <%= date_field_tag :medicaid_cubcare_due_on, @applicant.medicaid_cubcare_due_on&.strftime("%Y-%m-%d"), class: "date-field mt-2", min: 110.years.ago, max:"9999-12-31" %>
@@ -141,7 +141,7 @@
 
         <div id="eligibility-change-question" class="pt-4 instruction-row">
           <fieldset>
-            <legend class="weight-n instruction-row required"><%=l10n("faa.change_eligibility_status")%></legend>
+            <legend class="weight-n instruction-row required"><%=l10n(FinancialAssistanceRegistry.feature_enabled?(:remove_cubcare_references) ? 'faa.change_eligibility_status_no_cubcare' : 'faa.change_eligibility_status')%></legend>
             <div class="focus d-flex mt-3">
               <label class="radio mr-3" for="has_eligibility_changed_true">
                 <input id="has_eligibility_changed_true" type="radio" value="true" name="has_eligibility_changed" <%='checked' if @applicant.has_eligibility_changed? %>>
