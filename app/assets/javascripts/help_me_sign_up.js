@@ -48,6 +48,7 @@ $(document).on('click', '#back_to_help', function(){
 })
 
 $(document).on('click', '.select-broker', function(){
+  $('.select-broker').addClass('disabled');
   $.ajax({
     type: 'GET',
     data: {assister: this.getAttribute('data-assister'), broker: this.getAttribute('data-broker'),
