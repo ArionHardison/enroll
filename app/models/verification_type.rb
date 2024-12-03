@@ -32,6 +32,7 @@ class VerificationType
   OUTSTANDING_STATES = %w[outstanding rejected].freeze
   DUE_DATE_STATES = %w[review outstanding rejected].freeze
   SATISFIED_STATES = %w[verified attested valid curam].freeze
+  SELF_ATTESTATION_STATES = %w[attested verified].freeze
   NEGATIVE_STATES = %w[negative_response_received].freeze
 
 
