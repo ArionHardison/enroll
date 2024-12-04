@@ -383,6 +383,27 @@ RSpec.describe Family, dbclean: :around_each do
     end
   end
 
+  context "sep_eligible scope" do
+    let(:family_1) { FactoryBot.create(:family, :with_primary_family_member) }
+    let(:family_2) { FactoryBot.create(:family, :with_primary_family_member) }
+    let!(:sep_1) do
+      FactoryBot.create(:special_enrollment_period, family: family_1,
+                                                    start_on: TimeKeeper.date_of_record - 2.month,
+                                                    end_on: TimeKeeper.date_of_record - 1.month)
+    end
+    let!(:sep_2) do
+      FactoryBot.create(:special_enrollment_period, family: family_2,
+                                                    start_on: TimeKeeper.date_of_record,
+                                                    end_on: TimeKeeper.date_of_record + 1.month)
+    end
+
+    it 'return families which have active seps' do
+      expect(Family.sep_eligible.count).to eq 1
+      expect(Family.sep_eligible).to include family_2
+      expect(Family.sep_eligible).not_to include family_1
+    end
+  end
+
   describe '#none_applying_coverage?' do
     let(:person) { FactoryBot.create(:person, :with_consumer_role, :with_active_consumer_role) }
 

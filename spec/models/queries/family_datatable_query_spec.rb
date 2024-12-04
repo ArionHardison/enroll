@@ -23,7 +23,12 @@ describe Queries::FamilyDatatableQuery, "Filter Scopes for families Index", dbcl
 
   it "filters: sep_eligible" do
     fdq = Queries::FamilyDatatableQuery.new({"employer_options" => "sep_eligible"})
-    expect(fdq.build_scope.selector).to eq ({"is_active"=>true,"active_seps.count"=>{"$gt"=>0}})
+    selector = fdq.build_scope.selector
+    expect(selector["is_active"]).to eq(true)
+    expect(selector["special_enrollment_periods"]).to include("$elemMatch")
+    elem_match = selector["special_enrollment_periods"]["$elemMatch"]
+    expect(elem_match["start_on"]["$lte"]).to be <= TimeKeeper.date_of_record
+    expect(elem_match["end_on"]["$gte"]).to be >= TimeKeeper.date_of_record
   end
 
   it "filters: coverage_waived" do

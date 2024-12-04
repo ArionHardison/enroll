@@ -254,7 +254,11 @@ class Family
   scope :by_enrollment_updated_datetime_range,  ->(start_at, end_at){ where(:_id.in => HbxEnrollment.by_updated_datetime_range(start_at, end_at).distinct(:family_id))}
   scope :by_enrollment_effective_date_range,    ->(start_on, end_on){ where(:_id.in => HbxEnrollment.by_effective_date_range(start_on, end_on).distinct(:family_id))}
   scope :non_enrolled,                          ->{ where(:_id.in => HbxEnrollment.non_enrolled.distinct(:family_id))}
-  scope :sep_eligible,                          ->{ where(:"active_seps.count".gt => 0) }
+  scope :sep_eligible, lambda {
+    where(:special_enrollment_periods =>
+            {  :$elemMatch => { :start_on.lte => TimeKeeper.date_of_record,
+                                :end_on.gte => TimeKeeper.date_of_record } })
+  }
   scope :coverage_waived,                       ->{ where(:_id.in => HbxEnrollment.waived.distinct(:family_id))}
   scope :having_unverified_enrollment,          ->{ where(:_id.in => HbxEnrollment.by_unverified.distinct(:family_id)) }
   scope :with_all_verifications,                ->{ where(:_id.in => HbxEnrollment.verified.distinct(:family_id))}
