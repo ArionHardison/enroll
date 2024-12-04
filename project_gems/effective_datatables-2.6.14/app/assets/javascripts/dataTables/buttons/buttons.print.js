@@ -75,7 +75,23 @@ DataTable.ext.buttons.print = {
 	},
 
 	action: function ( e, dt, button, config ) {
-		var data = dt.buttons.exportData( config.exportOptions );
+		// Function to remove href tags
+		function removeHrefTags(data) {
+			return data.replace(/<a\b[^>]*>(.*?)<\/a>/gi, '$1');
+		}
+
+		var data = dt.buttons.exportData({
+			...config.exportOptions,
+			format: {
+				header: function (data, column) {
+					return removeHrefTags(data);
+				},
+				body: function (data, row, column, node) {
+					return removeHrefTags(data);
+				}
+			}
+		});
+
 		var addRow = function ( d, tag ) {
 			var str = '<tr>';
 
