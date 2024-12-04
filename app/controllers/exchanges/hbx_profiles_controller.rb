@@ -1066,7 +1066,6 @@ class Exchanges::HbxProfilesController < ApplicationController
       subject: "Please contact #{first_name} #{last_name}.",
       body: body
     }
-    create_secure_message message_params, hbx_profile, :sent
     create_secure_message message_params, agent, :inbox
     hbx_id = insured&.hbx_id || ""
     agent_email = find_email(agent,role)

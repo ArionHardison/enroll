@@ -767,6 +767,31 @@ RSpec.describe Exchanges::HbxProfilesController, dbclean: :around_each do
         expect(response.status).to eq 406
         expect(response.body).to eq "<error>Unsupported format</error>"
       end
+
+      context "with valid broker params" do
+        let(:admin_person) { FactoryBot.create(:person) }
+        let(:admin_user) { FactoryBot.create(:user, person: admin_person) }
+        let(:person) { FactoryBot.create(:person, :with_consumer_role) }
+        let(:family) { FactoryBot.create(:family, :with_primary_family_member, person: person) }
+        let(:broker)  { FactoryBot.create(:person, :with_broker_role) }
+        let(:params) { {"my_expert" => "true", "assister" => "", "broker" => broker.id, "person" => person.id, "email" => "admin@dc.gov" }}
+        let(:hbx_profile) { FactoryBot.create(:hbx_profile)}
+        let(:email) {FactoryBot.create(:email, kind: "work", address: "broker@test.com", person: broker)}
+
+        before do
+          allow(HbxProfile).to receive(:current_hbx).and_return hbx_profile
+          allow(broker).to receive(:emails).and_return [email]
+          sign_in(admin_user)
+          allow(controller).to receive(:authorize).and_return(true)
+          allow(person).to receive(:primary_family).and_return family
+        end
+
+        it "does not persist hbx profile messages" do
+          get :request_help, params:  params, format: :html
+          hbx_profile.reload
+          expect(hbx_profile.inbox.messages.size).to eq 0
+        end
+      end
     end
   end
 
