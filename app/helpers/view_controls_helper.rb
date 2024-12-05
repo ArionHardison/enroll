@@ -24,7 +24,7 @@ module ViewControlsHelper
     setting.meta.enum.map do |input|
       choice = input.first.first
       choice_label = l10n("exchange.manage_sep_types.#{setting.key}.#{choice}")
-      input_value = form.object&.send(setting.key)&.to_s || setting.meta.default.to_s
+      input_value = (form.object&.send(setting.key) || setting.meta.default).then { |v| v.is_a?(Array) ? v.map(&:to_s) : v.to_s }
       build_input_hash(choice, setting, form&.object_name.to_s, input_value, choice_label)
     end
   end
@@ -37,7 +37,7 @@ module ViewControlsHelper
       id: "#{setting.key}_#{choice}"
     }
     input_hash[:name] += "[]" if setting.meta.content_type == :checkbox_select
-    input_hash[:checked] = true if input_value.to_s == choice.to_s || (input_value.map(&:to_s).include?(choice.to_s) if input_value.is_a?(Array))
+    input_hash[:checked] = true if input_value == choice.to_s || (input_value.include?(choice.to_s) if input_value.is_a?(Array))
     input_hash
   end
 
