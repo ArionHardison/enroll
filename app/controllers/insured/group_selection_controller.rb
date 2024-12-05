@@ -394,6 +394,7 @@ class Insured::GroupSelectionController < ApplicationController
 
     if EnrollRegistry.feature_enabled?(:choose_coverage_medicaid_warning)
       is_eligible_for_medicaid = family_member_eligible_for_medicaid(family_member, @family, @new_effective_on&.year)
+      medicaid_or_chip_program_short_name_key = FinancialAssistanceRegistry.feature_enabled?(:remove_cubcare_references) ? :medicaid_or_chip_program_short_name_no_cubcare : :medicaid_or_chip_program_short_name
       translation_keys = { medicaid_or_chip_program_short_name: FinancialAssistanceRegistry[medicaid_or_chip_program_short_name_key].setting(:name).item }
       errors << l10n("insured.group_selection.medicaid_eligible_warning", translation_keys) if is_eligible_for_medicaid
     end
