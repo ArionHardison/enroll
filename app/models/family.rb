@@ -1514,20 +1514,6 @@ class Family
     application_type == 'Paper'
   end
 
-  def set_due_date_on_verification_types
-    verification_document_due = EnrollRegistry[:verification_document_due_in_days].item
-    family_members.each do |family_member|
-      person = family_member.person
-      person.consumer_role.verification_types.each do |v_type|
-        next unless v_type.type_unverified?
-        v_type.update_attributes(due_date: TimeKeeper.date_of_record + verification_document_due.days,
-                                 updated_by: nil,
-                                 due_date_type: "notice")
-        person.save!
-      end
-    end
-  end
-
   def set_admin_dt_enrollments(enrollment_set)
     @admin_dt_enrollments = enrollment_set
   end

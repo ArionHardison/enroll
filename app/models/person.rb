@@ -1306,8 +1306,6 @@ class Person
 
     result = @indian_tribe_member ||= !(tribal_id.nil? || tribal_id.empty?)
     result = @indian_tribe_member ||= !(tribal_state.nil? || tribal_state.empty?) if EnrollRegistry[:indian_alaskan_tribe_details].enabled?
-    # result = @indian_tribe_member ||= !(tribal_name.nil? || tribal_name.empty?) if EnrollRegistry[:indian_alaskan_tribe_details].enabled? && !FinancialAssistanceRegistry[:featured_tribes_selection].enabled?
-
     result
   end
 

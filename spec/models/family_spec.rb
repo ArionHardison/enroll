@@ -1482,17 +1482,6 @@ describe "has_valid_e_case_id" do
   end
 end
 
-describe "set_due_date_on_verification_types" do
-  let!(:person)           { FactoryBot.create(:person, :with_consumer_role, :with_active_consumer_role) }
-  let(:consumer_role)     { person.consumer_role }
-  let!(:family)           { FactoryBot.create(:family, :with_primary_family_member, person: person) }
-
-  it 'should set the due date on verfification type' do
-    person.consumer_role.update_attribute('aasm_state','verification_outstanding')
-    expect(family.set_due_date_on_verification_types).to be_truthy
-  end
-end
-
 describe Family, ".update_verification_types", dbclean: :after_each do
   let!(:person1) do
     FactoryBot.create(:person, :with_consumer_role, :with_active_consumer_role,

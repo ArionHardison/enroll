@@ -133,8 +133,8 @@ class ConsumerRole
   field :ssn_validation, type: String, default: "pending" #move to verification type
   validates_inclusion_of :ssn_validation, :in => SSN_VALIDATION_STATES, :allow_blank => false #move to verification type
 
-  field :native_validation, type: String, default: "na" #move to verification type
-  validates_inclusion_of :native_validation, :in => NATIVE_VALIDATION_STATES, :allow_blank => false #move to verification type
+  # @deprecated use American Indian Status verification_type on Person model
+  field :native_validation, type: String, default: "na"
 
   # DC residency
   field :is_state_resident, type: Boolean, default: nil
@@ -749,8 +749,12 @@ class ConsumerRole
     end
   end
 
+  # @deprecated use ai_or_an_tribe_member? instead
+  # TODO: replace all calls to this method with ai_or_an_tribe_member?
   def is_tribe_member?
-    if EnrollRegistry[:indian_alaskan_tribe_details].enabled?
+    if EnrollRegistry.feature_enabled?(:ai_an_self_attestation)
+      ai_or_an_tribe_member?
+    elsif EnrollRegistry[:indian_alaskan_tribe_details].enabled?
       return false if tribal_state.blank? || (tribal_name.blank? && tribe_codes.blank?)
       !tribal_state.blank? && (!tribal_name.blank? || !tribe_codes.blank?)
     else
@@ -794,25 +798,35 @@ class ConsumerRole
     live_types = []
 
     # Add 'LOCATION_RESIDENCY' if the feature is enabled
-    live_types << LOCATION_RESIDENCY if EnrollRegistry.feature_enabled?(:location_residency_verification_type)
+    live_types << VerificationType::LOCATION_RESIDENCY if EnrollRegistry.feature_enabled?(:location_residency_verification_type)
 
     # Add 'Social Security Number' if SSN is present
-    live_types << 'Social Security Number' if ssn
+    live_types << VerificationType::SOCIAL_SECURITY_NUMBER if ssn
 
     # Add 'American Indian Status' if applicable
-    live_types << 'American Indian Status' if ai_or_an?
+    live_types << VerificationType::AMERICAN_INDIAN_STATUS if ai_or_an_tribe_member?
 
     # Add either 'Citizenship' or 'Immigration status' based on us_citizen
-    live_types << (us_citizen ? 'Citizenship' : 'Immigration status') unless us_citizen.nil?
+    live_types << (us_citizen ? VerificationType::CITIZENSHIP : VerificationType::IMMIGRATION_STATUS) unless us_citizen.nil?
 
     # Ensure 'Alive Status' is at the end of the array if it's included
-    live_types << 'Alive Status' if ssn.present? && EnrollRegistry.feature_enabled?(:alive_status)
+    live_types << VerificationType::ALIVE_STATUS if ssn.present? && EnrollRegistry.feature_enabled?(:alive_status)
 
     live_types
   end
 
-  def ai_or_an?
-    if EnrollRegistry.feature_enabled?(:indian_alaskan_tribe_details)
+  # Determines if the person is an American Indian or Alaska Native tribe member.
+  #
+  # IMPORTANT: The source of truth for this information is the indian_tribe_member attribute of the person.
+  # Legacy code is still used when the `:ai_an_self_attestation` feature is disabled, however, this
+  # will be considered deprecated once the `:ai_an_self_attestation` feature is enabled in PROD. When the
+  # feature flag is cleaned up, this method should simply return person.indian_tribe_member
+  #
+  # @return [Boolean] true if the person is an American Indian or Alaska Native tribe member, false otherwise.
+  def ai_or_an_tribe_member?
+    if EnrollRegistry.feature_enabled?(:ai_an_self_attestation)
+      person.indian_tribe_member
+    elsif EnrollRegistry.feature_enabled?(:indian_alaskan_tribe_details)
       !(tribal_state.nil? || tribal_state.empty?) && !(check_tribal_name.nil? || check_tribal_name.empty?)
     else
       !(tribal_id.nil? || tribal_id.empty?)
@@ -1116,14 +1130,6 @@ class ConsumerRole
     lawful_presence_authorized?
   end
 
-  def native_verified?
-    native_validation == "valid"
-  end
-
-  def native_outstanding?
-    native_validation == "outstanding"
-  end
-
   def indian_conflict?
     citizen_status == "indian_tribe_member"
   end
@@ -1308,17 +1314,6 @@ class ConsumerRole
 
   def ensure_validation_states
     ensure_ssn_validation_status
-    ensure_native_validation
-  end
-
-  def ensure_native_validation
-    self.native_validation = "na" if EnrollRegistry[:indian_alaskan_tribe_details].enabled? && (tribal_state.nil? || tribal_state.empty? || check_tribal_name.nil? || check_tribal_name.empty?)
-
-    if tribal_id.nil? || tribal_id.empty?
-      self.native_validation = "na"
-    else
-      self.native_validation = "outstanding" if native_validation == "na"
-    end
   end
 
   def check_tribal_name

@@ -358,53 +358,6 @@ RSpec.describe ConsumerRole, dbclean: :after_each, type: :model do
       end
     end
 
-    describe 'Native American verification' do
-      before do
-        allow(EnrollRegistry[:indian_alaskan_tribe_details].feature).to receive(:is_enabled).and_return(false)
-      end
-      shared_examples_for 'ensures native american field value' do |action, state, consumer_kind, tribe, tribe_state|
-        it "#{action} #{state} for #{consumer_kind}" do
-          person.update_attributes!(:tribal_id => '444444444') if tribe
-          person.consumer_role.update_attributes!(:native_validation => tribe_state) if tribe_state
-          expect(person.consumer_role.native_validation).to eq(state)
-        end
-      end
-
-      context "native american verification types" do
-        let!(:person1) { FactoryBot.create(:person, :with_consumer_role, :with_valid_native_american_information) }
-        let!(:family) {FactoryBot.create(:family, :with_primary_family_member, person: person1)}
-        let!(:hbx_enrollment) {FactoryBot.create(:hbx_enrollment, :with_enrollment_members, family: family, enrollment_members: family.family_members)}
-
-        before do
-          allow(EnrollRegistry[:indian_alaskan_tribe_details].feature).to receive(:is_enabled).and_return(true)
-          allow(EnrollRegistry[:indian_alaskan_tribe_codes].feature).to receive(:is_enabled).and_return(true)
-          allow(EnrollRegistry[:enroll_app].setting(:state_abbreviation)).to receive(:item).and_return('ME')
-          person.update_attributes!(tribal_state: "ME", tribe_codes: ["", "PE"])
-          v_type = VerificationType.new(type_name: "American Indian Status", validation_status: 'outstanding', inactive: false)
-          person1.verification_types << v_type
-          person1.save!
-        end
-
-        it "does not deactivate native american verification type" do
-          ai_an_type = person1.verification_types.where(type_name: "American Indian Status").first
-          ai_an_type.update_attributes!(validation_status: 'negative_response_received')
-          person1.save!
-          expect(ai_an_type.inactive).to eql(false)
-        end
-      end
-
-      context "native validation doesn't exist" do
-        it_behaves_like 'ensures native american field value', 'assigns', 'na', 'NON native american consumer', nil, nil
-
-        it_behaves_like 'ensures native american field value', 'assigns', 'outstanding', 'native american consumer', '444444444', nil
-      end
-      context 'existing native validation' do
-        it_behaves_like 'ensures native american field value', 'assigns', 'pending', 'pending native american consumer', 'tribe', 'pending'
-        it_behaves_like 'ensures native american field value', "doesn't change", 'outstanding', 'outstanding native american consumer', 'tribe', 'outstanding'
-        it_behaves_like 'ensures native american field value', 'assigns', 'outstanding', 'na native american consumer', 'tribe', 'na'
-      end
-    end
-
     describe "#check_tribal_name" do
 
       before do
@@ -743,7 +696,7 @@ RSpec.describe ConsumerRole, dbclean: :after_each, type: :model do
             end
 
             it "leaves indian tribe validition status as attested and moves to pending or unverified for the rest" do
-              consumer.tribal_id = "345543345"
+              consumer.person.update_attributes!(indian_tribe_member: true, tribal_state: "ME", tribe_codes: ["HM"])
               consumer.coverage_purchased!
               consumer.verification_types.each do |verif|
                 case verif.type_name
@@ -1103,7 +1056,7 @@ RSpec.describe ConsumerRole, dbclean: :after_each, type: :model do
         end
 
         it 'should NOT fail indian tribe status if person updates native status field' do
-          person.update_attributes(tribal_id: "1234567")
+          person.update_attributes!(indian_tribe_member: true)
           consumer_role.update_attributes(aasm_state: "ssa_pending")
           result = consumer_role.check_native_status(family, true)
           expect(result).to eq nil # indicates fail_native_status! was not called
@@ -1296,7 +1249,7 @@ RSpec.describe ConsumerRole, dbclean: :after_each, type: :model do
         end
 
         it 'aasm state should be in verification_outstanding and american indian status in attested upon coverage purchase' do
-          person.update_attributes!(tribal_id: "12345")
+          person.update_attributes!(indian_tribe_member: true)
           consumer_role.coverage_purchased!(verification_attr)
           american_indian_status = person.american_indian_status
           expect(american_indian_status.validation_status).to eq 'attested'

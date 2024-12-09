@@ -1098,7 +1098,6 @@
       "components/benefit_sponsors/spec/models/benefit_sponsors/organizations/organization_forms/broker_management_form_spec.rb",
       "spec/domain/operations/households/check_existing_coverage_by_person_spec.rb",
       "spec/models/fedhub_result_propagation_spec.rb",
-      "spec/data_migrations/migrate_verification_types_spec.rb",
       "spec/models/importers/transcripts/enrollment_transcript_spec.rb",
       "spec/script/daily_eligibility_determination_change_report_spec.rb"
     ]

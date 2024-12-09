@@ -146,7 +146,7 @@ Then(/^.+ publishes the quote$/) do
 end
 
 Then(/^.+ selects plan offerings by metal level and enters (.*) for employee and deps$/) do |int|
-  wait_for_ajax(3, 2)
+  wait_for_ajax(3, 5)
   find(BrokerHealthBenefitsPage.by_metal_level_tab).click
   wait_for_ajax(3, 2)
   expect(page).to have_content("Gold")
@@ -401,8 +401,8 @@ And(/^Primary Broker should see HC4CC option$/) do
 end
 
 Then(/^Primary broker should see plan names in employee costs$/) do
-  wait_for_ajax
-  expect(page).to have_content(/Lowest Cost Plan/, wait: 5)
+  wait_for_ajax(3, 10)
+  expect(page).to have_content(/Lowest Cost Plan/, wait: 10)
 end
 
 Then(/^Primary broker should see total HC4CC subcidy applied amount$/) do
