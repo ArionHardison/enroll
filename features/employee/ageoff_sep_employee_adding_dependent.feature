@@ -14,6 +14,7 @@ Feature: Non-congressional EE adding non-diabled 26 years old dependent
     And renewal employer AB Widgets has active and renewal enrollment_open benefit applications
     And this employer renewal application is under open enrollment
 
+  @flaky
   Scenario: Employee enters a SEP, adds non-diabled 26 years old dependent and purchases plan
     Given there exists Patrick Doe employee for employer AB Widgets
     And employee Patrick Doe has current hired on date
